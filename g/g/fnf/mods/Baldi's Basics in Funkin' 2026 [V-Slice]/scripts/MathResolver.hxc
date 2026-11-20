@@ -1,0 +1,173 @@
+import flixel.input.keyboard.FlxKey;
+import flixel.util.FlxSignal;
+import flixel.FlxBasic;
+import funkin.play.PlayState;
+import funkin.util.plugins.VolumePlugin;
+import funkin.modding.module.ModuleHandler;
+
+class MathResolver extends FlxBasic // to be added to the state and be more self dependent ok. //not done will be replacing math stuff later
+{
+	public var isInMath:Bool = false;
+
+	public var lockInputs:Bool = false;
+
+	public var intendedValue:Int = 0;
+	public var value1:Int = 1;
+	public var value2:Int = 1;
+	public var isAddition:Bool = true;
+
+	public var input = "";
+
+	var numLength:Int = 0;
+
+	var mathMisses:Int = 0;
+
+	public function new()
+	{
+		super();
+		this.visible = false;
+	}
+
+	public function start(value1:Int, value2:Int, isAddition:Bool = true)
+	{
+		if (this.isInMath)
+		{
+			// u already were in math so we can assume u failed
+			resolveMath();
+		}
+		
+		this.value1 = value1;
+		this.value2 = value2;
+		this.isAddition = isAddition;
+		this.lockInputs = false;
+		this.input = "";
+		
+		this.intendedValue = this.isAddition ? (this.value1 + this.value2) : (this.value1 - this.value2);
+		
+		numLength = Std.string(intendedValue).length;
+		
+		trace(numLength);
+		
+		this.isInMath = true;
+		
+		disableKeys();
+	}
+	
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		
+		if (isInMath && lockInputs == false)
+		{
+			var keyPress:FlxKey = FlxG.keys.firstJustPressed();
+			
+			if (keyPress != -1)
+			{
+				var numToType:String = '';
+				switch (keyPress)
+				{
+					case 48, 49, 50, 51, 52, 53, 54, 55, 56, 57:
+						numToType = keyPress - 48;
+						
+					case 96, 97, 98, 99, 100, 101, 102, 103, 104, 105:
+						numToType = keyPress - 96;
+						
+					case 189, 109:
+						numToType = '-';
+						
+					default:
+						return;
+				}
+				// // NUMPAD
+				// if (keyPress >= 96 && keyPress < 106) keyPress = keyPress - 96;
+				
+				// // NUMBERS ABOVE LETTERS IDK HOW ITS CALLED
+				// else if (keyPress >= 48 && keyPress < 58) keyPress = keyPress - 48;
+				
+				input += numToType;
+
+				onKeyPress(keyPress);
+				
+				if (input.length >= numLength) resolveMath();
+			}
+		}
+	}
+	
+	public function resolveMath()
+	{
+		if (!isInMath)
+		{
+			return;
+		}
+		isInMath = false;
+		
+		trace(Std.parseInt(input) == intendedValue);
+		onResolved(Std.parseInt(input) == intendedValue);
+	}
+	
+	public function disableKeys(val:Bool = true)
+	{
+		if (PlayState.instance != null)
+		{
+			PlayState.instance.disableKeys = val;
+			if(!PlayState.instance.isBotPlayMode)
+			PlayState.instance.playerStrumline.isPlayer = !val;
+		}
+		if(val)
+		{
+			for (p in FlxG.plugins.list) {
+			if (Std.isOfType(p, VolumePlugin)) {
+			FlxG.plugins.remove(p);
+			}
+			}
+		}
+		else
+		{
+			var initialize = true;
+			for (p in FlxG.plugins.list) {
+			if (Std.isOfType(p, VolumePlugin)) {
+			initialize = false;
+			break;
+			}
+			}
+			if(initialize)
+			VolumePlugin.initialize();
+		}
+	}
+	
+	override function destroy()
+	{
+		disableKeys(false);
+
+		super.destroy();
+	}
+
+	function onKeyPress(number)
+	{
+		var Thinkpad = ModuleHandler.getModule('Thinkpad');
+		Thinkpad.typedText.text = this.input;
+	}
+
+	function onResolved(successful)
+	{
+		var Thinkpad = ModuleHandler.getModule('Thinkpad');
+		Thinkpad.typedText.text = this.input;
+		Thinkpad.typedText.color = successful ? 0xFF008800 : 0xFF880000;
+		if(this.input != "" || PlayState.instance.isBotPlayMode)
+		Thinkpad.thinkPadText.text += ' ' + this.intendedValue;
+		
+		FlxG.sound.play(Paths.sound('basics/' + (successful ? 'correct' : 'wrong')));
+		
+		if (Thinkpad.markerIdx > 2) return;
+
+		Thinkpad.markers[Thinkpad.markerIdx].visible = true;
+		if (!successful)
+		{
+			Thinkpad.markers[Thinkpad.markerIdx].loadGraphic(Paths.image('mechanics/thinkpad/X'));
+			
+			mathMisses += 1;
+		}
+		
+		Thinkpad.markerIdx += 1;
+	}
+}

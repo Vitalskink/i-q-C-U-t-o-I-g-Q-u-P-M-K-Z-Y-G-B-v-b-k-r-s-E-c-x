@@ -1,0 +1,210 @@
+import funkin.play.PlayState;
+
+import funkin.modding.module.Module;
+
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.play.notes.notestyle.NoteStyle;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.StrumlineNote;
+import funkin.util.Constants;
+
+class FirewallOpponentFireNotes extends Module
+{
+	var isFirewall:Bool = false;
+
+	function new()
+	{
+		super('FirewallOpponentFireNotes');
+	}
+
+	override function onSongLoaded(event)
+	{
+		super.onSongLoaded(event);
+
+		if (PlayState.instance == null) return;
+		if (PlayState.instance.currentSong == null) return;
+
+		var songName:String = PlayState.instance.currentSong.id;
+
+		if (songName != null && songName.toLowerCase() == "firewall")
+		{
+			isFirewall = true;
+
+			var noteStyle:NoteStyle = NoteStyleRegistry.instance.fetchEntry("fire") ?? NoteStyleRegistry.instance.fetchDefault();
+
+			noteStyle.buildNoteFrames(true);
+			noteStyle.buildHoldCoverFrames(true);
+			noteStyle.buildSplashFrames(true);
+
+			setupOpponentNotes(noteStyle);
+		}
+		else
+		{
+			isFirewall = false;
+		}
+	}
+
+	function setupOpponentNotes(style:NoteStyle)
+	{
+		var strumline:Strumline = PlayState.instance.opponentStrumline;
+
+		if (strumline == null) return;
+
+		strumline.noteStyle = style;
+
+		strumline.noteSplashes.clear();
+		strumline.noteHoldCovers.clear();
+
+		for (i in 0...Strumline.KEY_COUNT)
+		{
+			var child:StrumlineNote = strumline.strumlineNotes.members[i];
+
+			var oldCenterX:Float = child.x + (child.width / 2);
+			var oldCenterY:Float = child.y + (child.height / 2);
+
+			style.applyStrumlineFrames(child);
+			style.applyStrumlineAnimations(child, Strumline.DIRECTIONS[i]);
+
+			var styleScale = style.getStrumlineScale();
+			child.scale.set(
+				styleScale * strumline.strumlineScale.x,
+				styleScale * strumline.strumlineScale.y
+			);
+
+			child.playStatic();
+			child.updateHitbox();
+
+			style.applyStrumlineOffsets(child);
+
+			child.x = oldCenterX - (child.width / 2);
+			child.y = oldCenterY - (child.height / 2);
+		}
+
+		for (notes in strumline.notes)
+		{
+			var noteKindStyle:NoteStyle = NoteKindManager.getNoteStyle(notes.kind, strumline.noteStyle.id) ?? style;
+
+			notes.setupNoteGraphic(noteKindStyle);
+
+			notes.scale.x *= strumline.strumlineScale.x;
+			notes.scale.y *= strumline.strumlineScale.y;
+
+			notes.playNoteAnimation(notes.noteData.getDirection());
+
+			if (!notes.get_isHoldNote())
+			{
+				var dir:Int = notes.noteData.getDirection();
+				var animName:String = "";
+
+				switch (dir)
+				{
+					case 0: animName = "left";
+					case 1: animName = "down";
+					case 2: animName = "up";
+					case 3: animName = "right";
+				}
+
+				if (notes.animation.getByName(animName) == null)
+				{
+					notes.animation.addByPrefix(animName, animName, 24, true);
+				}
+
+				notes.animation.play(animName, true);
+			}
+
+			if (notes.get_isHoldNote())
+			{
+				var oldHoldCenterX:Float = notes.holdNoteSprite.x + (notes.holdNoteSprite.width / 2);
+
+				notes.holdNoteSprite.setupHoldNoteGraphic(style);
+				notes.holdNoteSprite.noteStyleOffsets = style.getHoldNoteOffsets();
+				notes.holdNoteSprite.graphicWidth = notes.holdNoteSprite.graphic.width / 8 * notes.holdNoteSprite.zoom;
+
+				notes.holdNoteSprite.graphicHeight = notes.holdNoteSprite.sustainLength * Constants.PIXELS_PER_MS * (strumline.scrollSpeed ?? 1.0);
+
+				notes.holdNoteSprite.updateHitbox();
+				notes.holdNoteSprite.updateClipping();
+				notes.holdNoteSprite.updateColorTransform();
+
+				notes.holdNoteSprite.x = oldHoldCenterX - (notes.holdNoteSprite.width / 2);
+
+				if (notes.holdNoteSprite.hitNote)
+				{
+					strumline.playNoteHoldCover(notes.holdNoteSprite);
+				}
+			}
+
+			strumline.onNoteIncoming.dispatch(notes);
+		}
+	}
+
+	override function onUpdate(elapsed:Float)
+	{
+		super.onUpdate(elapsed);
+
+		if (!isFirewall) return;
+		if (PlayState.instance == null) return;
+
+		var strumline:Strumline = PlayState.instance.opponentStrumline;
+		if (strumline == null) return;
+
+		for (note in strumline.strumlineNotes.members)
+		{
+			if (note == null) continue;
+			if (note.animation == null) continue;
+			if (note.animation.curAnim == null) continue;
+
+			var animName:String = note.animation.curAnim.name;
+
+			if (animName.indexOf("static") != -1)
+			{
+				if (note.animation.curAnim.finished)
+				{
+					note.playStatic();
+				}
+			}
+		}
+
+		for (notes in strumline.notes)
+		{
+			if (notes == null) continue;
+			if (notes.animation == null) continue;
+			if (notes.get_isHoldNote()) continue;
+
+			var dir:Int = notes.noteData.getDirection();
+			var animName:String = "";
+
+			switch (dir)
+			{
+				case 0: animName = "left";
+				case 1: animName = "down";
+				case 2: animName = "up";
+				case 3: animName = "right";
+			}
+
+			if (notes.animation.curAnim == null || notes.animation.curAnim.name != animName)
+			{
+				notes.animation.play(animName, true);
+			}
+		}
+	}
+
+	override function onSongRetry(event)
+	{
+		super.onSongRetry(event);
+
+		if (PlayState.instance != null && PlayState.instance.currentSong != null)
+		{
+			var songName:String = PlayState.instance.currentSong.id;
+
+			if (songName != null && songName.toLowerCase() == "firewall")
+			{
+				isFirewall = true;
+
+				var noteStyle:NoteStyle = NoteStyleRegistry.instance.fetchEntry("fire") ?? NoteStyleRegistry.instance.fetchDefault();
+				setupOpponentNotes(noteStyle);
+			}
+		}
+	}
+}

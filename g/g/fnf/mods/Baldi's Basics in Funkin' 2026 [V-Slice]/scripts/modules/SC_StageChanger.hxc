@@ -1,0 +1,164 @@
+import flixel.FlxG;
+import funkin.data.stage.StageRegistry;
+import funkin.graphics.FunkinSprite;
+import funkin.play.PlayState;
+import funkin.play.stage.Stage;
+import funkin.play.character.CharacterDataParser;
+import funkin.play.character.CharacterType;
+import funkin.play.character.BaseCharacter;
+import funkin.modding.module.Module;
+import haxe.ds.StringMap;
+import StringTools;
+import flixel.FlxSprite;
+import funkin.save.Save;
+
+class BaldisSC_StageChanger extends Module
+{
+  function new()
+  {
+    super('SC_StageChanger');
+  }
+
+  function onSongLoaded(event:SongLoadScriptEvent):Void
+  {
+    var stageIDMap:StringMap<String> = new StringMap();
+
+    for (event in event.events)
+    {
+      if (event.eventKind == 'ChangeStage')
+      {
+        var stageID = event.value.stageid;
+        if (stageID != null && stageID != '')
+        {
+          stageIDMap.set(stageID, stageID);
+        }
+      }
+    }
+
+    for (stageID in stageIDMap.keys())
+    {
+      var stageData:Stage = StageRegistry.instance.parseEntryDataWithMigration(stageID, StageRegistry.instance.fetchEntryVersion(stageID));
+      for (prop in stageData.props)
+      {
+        if (StringTools.startsWith(prop.assetPath, '#')) continue;
+        Paths.image(prop.assetPath, stageData.directory ?? 'shared');
+      }
+    }
+  }
+
+  function swapStage(stageID:String = 'mainStage', ?characters:Array<String> = null):Void
+  {
+    if (PlayState.instance == null || PlayState.instance.currentStage == null) return;
+    if (PlayState.instance.isMinimalMode) return;
+
+    var curStage = PlayState.instance.currentStage;
+
+    var bfID = characters != null ? characters[0] : curStage.getBoyfriend()?.characterId;
+    var gfID = characters != null ? characters[1] : curStage.getGirlfriend()?.characterId;
+    var dadID = characters != null ? characters[2] : curStage.getDad()?.characterId;
+
+    var momChar = curStage.characters.get("mom");
+    var momID = momChar != null ? momChar.characterId : null;
+
+    //FlxG.camera.filters = [];
+
+    loadStage(stageID);
+
+    var bf:BaseCharacter = CharacterDataParser.fetchCharacter(bfID);
+    var gf:BaseCharacter = CharacterDataParser.fetchCharacter(gfID);
+    var dad:BaseCharacter = CharacterDataParser.fetchCharacter(dadID);
+
+    if (bf != null)
+    {
+      bf.initHealthIcon(true);
+      if (PlayState.instance.currentStage.getBoyfriend() != null)
+        PlayState.instance.currentStage.getBoyfriend().destroy();
+      PlayState.instance.currentStage.addCharacter(bf, CharacterType.BF);
+    }
+
+    if (gf != null)
+    {
+      if (PlayState.instance.currentStage.getGirlfriend() != null)
+        PlayState.instance.currentStage.getGirlfriend().destroy();
+      PlayState.instance.currentStage.addCharacter(gf, CharacterType.GF);
+    }
+
+    if (dad != null)
+    {
+      dad.initHealthIcon(true);
+      if (PlayState.instance.currentStage.getDad() != null)
+        PlayState.instance.currentStage.getDad().destroy();
+      PlayState.instance.currentStage.addCharacter(dad, CharacterType.DAD);
+    }
+
+    if (momID != null)
+    {
+      var mom:BaseCharacter = CharacterDataParser.fetchCharacter(momID);
+
+      if (mom != null)
+      {
+        PlayState.instance.currentStage.add(mom);
+
+        mom.zIndex = 999999;
+        mom.cameras = [PlayState.instance.camHUD];
+        mom.scrollFactor.set(0, 0);
+
+        mom.x = (FlxG.width * 0.5) - mom.characterOrigin.x;
+        mom.y = (FlxG.height * 0.5) - mom.characterOrigin.y;
+
+        PlayState.instance.currentStage.characters.set("mom", mom);
+      }
+    }
+
+    PlayState.instance.currentStage.resetStage();
+    PlayState.instance.currentStage.refresh();
+  }
+
+  function loadStage(id:String):Void
+  {
+    PlayState.instance.remove(PlayState.instance.currentStage);
+    PlayState.instance.currentStage.kill();
+
+    for (sprite in PlayState.instance.currentStage.group)
+    {
+      if (sprite != null)
+      {
+        sprite.kill();
+        PlayState.instance.currentStage.group.remove(sprite);
+      }
+    }
+
+    PlayState.instance.currentStage = null;
+    PlayState.instance.currentStage = StageRegistry.instance.fetchEntry(id);
+
+    if (PlayState.instance.currentStage != null)
+    {
+      stageDirectory = PlayState.instance.currentStage?._data?.directory ?? "shared";
+      Paths.setCurrentLevel(stageDirectory);
+
+      PlayState.instance.currentStage.revive();
+      PlayState.instance.resetCameraZoom();
+
+      PlayState.instance.currentStage.buildStage();
+      PlayState.instance.currentStage.resetStage();
+      PlayState.instance.add(PlayState.instance.currentStage);
+    }
+  }
+
+  override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    if (PlayState.instance.currentStage.id != PlayState.instance.currentChart.stage)
+    {
+      resetStage();
+    }
+  }
+
+  function resetStage():Void
+  {
+    swapStage(PlayState.instance.currentChart.stage, [
+      PlayState.instance.currentChart.characters.player,
+      PlayState.instance.currentChart.characters.girlfriend,
+      PlayState.instance.currentChart.characters.opponent
+    ]);
+  }
+}

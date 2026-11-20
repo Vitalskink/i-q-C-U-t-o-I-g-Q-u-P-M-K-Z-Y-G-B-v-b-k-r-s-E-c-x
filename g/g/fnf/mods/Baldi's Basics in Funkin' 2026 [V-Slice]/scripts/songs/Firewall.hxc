@@ -1,0 +1,191 @@
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.PlayStatePlaylist;
+import funkin.modding.events.SongTimeScriptEvent;
+import funkin.modding.events.CountdownScriptEvent;
+import funkin.play.cutscene.VideoCutscene;
+import funkin.play.cutscene.CutsceneType;
+import flixel.FlxSprite;
+import funkin.Paths;
+
+class FirewallSong extends Song
+{
+	var whiteBg:FlxSprite;
+	var bluescreenFull:FlxSprite;
+	var popup1:FlxSprite;
+	var popup2:FlxSprite;
+	var popup3:FlxSprite;
+
+	var hasPlayedENDCutscene:Bool;
+
+	public function new()
+	{
+		super("firewall");
+		hasPlayedENDCutscene = false;
+	}
+
+	override function onCreate()
+	{
+		super.onCreate();
+
+		hasPlayedENDCutscene = false;
+
+		var game = PlayState.instance;
+		if (game == null) return;
+
+		whiteBg = new FlxSprite(0, 0);
+		whiteBg.loadGraphic(Paths.image("stages/classroom/null/white"));
+		whiteBg.cameras = [game.camHUD];
+		whiteBg.scrollFactor.set(0, 0);
+		whiteBg.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+		whiteBg.updateHitbox();
+		whiteBg.alpha = 0.35;
+		whiteBg.visible = false;
+		whiteBg.zIndex = 998;
+		game.add(whiteBg);
+
+		bluescreenFull = new FlxSprite(0, 0);
+		bluescreenFull.loadGraphic(Paths.image("stages/firewall/bluescreenFull"));
+		bluescreenFull.cameras = [game.camHUD];
+		bluescreenFull.scrollFactor.set(0, 0);
+		bluescreenFull.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+		bluescreenFull.updateHitbox();
+		bluescreenFull.visible = false;
+		bluescreenFull.zIndex = 999999999;
+		game.add(bluescreenFull);
+
+		popup1 = new FlxSprite(0, 0);
+		popup1.loadGraphic(Paths.image("stages/firewall/popup"));
+		popup1.cameras = [game.camHUD];
+		popup1.scrollFactor.set(0, 0);
+		popup1.updateHitbox();
+		popup1.visible = false;
+		popup1.zIndex = 1000;
+		game.add(popup1);
+
+		popup2 = new FlxSprite(0, 0);
+		popup2.loadGraphic(Paths.image("stages/firewall/popup"));
+		popup2.cameras = [game.camHUD];
+		popup2.scrollFactor.set(0, 0);
+		popup2.updateHitbox();
+		popup2.visible = false;
+		popup2.zIndex = 1001;
+		game.add(popup2);
+
+		popup3 = new FlxSprite(0, 0);
+		popup3.loadGraphic(Paths.image("stages/firewall/popup"));
+		popup3.cameras = [game.camHUD];
+		popup3.scrollFactor.set(0, 0);
+		popup3.updateHitbox();
+		popup3.visible = false;
+		popup3.zIndex = 1002;
+		game.add(popup3);
+	}
+
+	override function onStepHit(event:SongTimeScriptEvent):Void
+	{
+		super.onStepHit(event);
+
+		var game = PlayState.instance;
+		if (game == null) return;
+
+		if (event.step == 858)
+		{
+			whiteBg.visible = true;
+			popup1.visible = true;
+		}
+
+		if (event.step == 860)
+		{
+			popup2.visible = true;
+		}
+
+		if (event.step == 862)
+		{
+			popup3.visible = true;
+		}
+
+		if (event.step == 864)
+		{
+			whiteBg.visible = false;
+			popup1.visible = false;
+			popup2.visible = false;
+			popup3.visible = false;
+		}
+
+		if (event.step == 1391)
+		{
+			bluescreenFull.visible = true;
+		}
+	}
+
+	override function onUpdate(elapsed:Float)
+	{
+		super.onUpdate(elapsed);
+
+		var game = PlayState.instance;
+		if (game == null) return;
+
+		if (whiteBg != null)
+		{
+			whiteBg.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+			whiteBg.updateHitbox();
+			whiteBg.x = 0;
+			whiteBg.y = 0;
+		}
+
+		if (bluescreenFull != null)
+		{
+			bluescreenFull.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+			bluescreenFull.updateHitbox();
+			bluescreenFull.x = 0;
+			bluescreenFull.y = 0;
+		}
+
+		if (popup1 != null && popup2 != null && popup3 != null)
+		{
+			var padding:Int = 50;
+
+			popup1.x = (game.camHUD.width - popup1.width) / 2;
+			popup1.y = (game.camHUD.height - popup1.height) / 2;
+
+			popup2.x = Math.max(padding, popup1.x - popup2.width - 40);
+			popup2.y = popup1.y + 30;
+
+			popup3.x = Math.min(game.camHUD.width - popup3.width - padding, popup1.x + popup1.width + 40);
+			popup3.y = popup1.y + 60;
+		}
+	}
+
+	override function onSongEnd(event:CountdownScriptEvent):Void
+	{
+		super.onSongEnd(event);
+
+		if (hasPlayedENDCutscene)
+			return;
+
+		hasPlayedENDCutscene = true;
+		event.cancel();
+		startENDVideo();
+	}
+
+	function startENDVideo():Void
+	{
+		VideoCutscene.play(Paths.videos('paldoEnding'), CutsceneType.ENDING);
+	}
+
+	override function onSongRetry(event:funkin.modding.events.ScriptEvent):Void
+	{
+		super.onSongRetry(event);
+		hasPlayedENDCutscene = false;
+	}
+
+	override function onDestroy()
+	{
+		if (whiteBg != null) whiteBg.destroy();
+		if (bluescreenFull != null) bluescreenFull.destroy();
+		if (popup1 != null) popup1.destroy();
+		if (popup2 != null) popup2.destroy();
+		if (popup3 != null) popup3.destroy();
+	}
+}

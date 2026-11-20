@@ -1,0 +1,53 @@
+{
+ "version": "1.0.2",
+ "name": "Expulsion",
+ "props": [
+  {
+   "assetPath": "stages/classroom/poly_bg",
+   "atlasSettings": null,
+   "name": "BG1",
+   "position": [257, -491],
+   "scale": 0.4,
+   "startingAnimation": ""
+  },
+  {
+   "assetPath": "stages/classroom/poly_chairs",
+   "atlasSettings": null,
+   "name": "bg2",
+   "position": [259, -491],
+   "scale": 0.4,
+   "startingAnimation": "",
+   "zIndex": 1
+  },
+  {
+   "assetPath": "stages/classroom/poly_table",
+   "atlasSettings": null,
+   "name": "bg3",
+   "position": [256, -491],
+   "scale": 0.4,
+   "startingAnimation": "",
+   "zIndex": 502
+  }
+ ],
+ "characters": {
+  "bf": {
+   "cameraOffsets": [-200, -50],
+   "position": [1122, 76],
+   "scale": 1.4,
+   "zIndex": 300
+  },
+  "dad": {
+   "cameraOffsets": [100, -50],
+   "position": [650, 120],
+   "scale": 1.6,
+   "zIndex": 200
+  },
+  "gf": {
+   "cameraOffsets": [0, 50],
+   "position": [100, -360],
+   "scale": 1.5,
+   "zIndex": 100
+  }
+ },
+ "cameraZoom": 1.35
+}

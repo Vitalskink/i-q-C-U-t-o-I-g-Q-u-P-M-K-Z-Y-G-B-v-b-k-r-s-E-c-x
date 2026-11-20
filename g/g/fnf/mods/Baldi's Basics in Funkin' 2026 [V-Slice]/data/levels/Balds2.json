@@ -1,0 +1,11 @@
+{
+    "version": "1.0.0",
+    "visible": false,
+    "name": "freeplay",
+    "titleAsset": "storymenu/titles/freeplay",
+    "props": [],
+    "background": "#FFFFFF",
+    "songs": [
+        "firewall"
+    ]
+}

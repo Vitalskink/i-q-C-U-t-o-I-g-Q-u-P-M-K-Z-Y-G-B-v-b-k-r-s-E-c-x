@@ -1,0 +1,41 @@
+import flixel.FlxG;
+import funkin.play.stage.Stage;
+
+class Classroom2finalstage extends Stage
+{
+    function new()
+    {
+        super("classroom2");
+    }
+
+    override function buildStage()
+    {
+        super.buildStage();
+
+        var bg2 = getNamedProp("bg2");
+        var bg3 = getNamedProp("bg3");
+
+        if (bg2 != null)
+        {
+            if (FlxG.random.bool(50))
+                bg2.loadTexture("stages/classroom/chairs2");
+            else
+                bg2.loadTexture("stages/classroom/chairs");
+        }
+
+        if (bg3 != null)
+        {
+            var n = FlxG.random.int(0, 46);
+            if (n == 0)
+                bg3.loadTexture("stages/classroom/chalkboards/default");
+            else
+                bg3.loadTexture("stages/classroom/chalkboards/" + (n - 1));
+        }
+
+    }
+
+    override function onSongRetry(event)
+    {
+        super.onSongRetry(event);
+    }
+}

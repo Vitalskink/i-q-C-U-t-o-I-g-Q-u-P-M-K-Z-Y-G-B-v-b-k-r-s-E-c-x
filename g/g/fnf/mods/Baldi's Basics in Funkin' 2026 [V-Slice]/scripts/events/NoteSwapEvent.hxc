@@ -1,0 +1,224 @@
+import funkin.play.PlayState;
+import funkin.play.event.ScriptedSongEvent;
+
+import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
+import funkin.play.scoring.Scoring;
+import funkin.Preferences;
+
+import funkin.Highscore;
+
+import funkin.util.Constants;
+import funkin.Paths;
+import flixel.FlxG;
+
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.play.notes.notestyle.NoteStyle;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.play.notes.NoteSplash;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.StrumlineNote;
+import funkin.play.notes.NoteHoldCover;
+import funkin.play.notes.NoteSprite;
+import funkin.play.components.PopUpStuff;
+
+class BaldsNoteSwapEvent extends ScriptedSongEvent {
+
+	public override function handleEvent(data) {
+		if (PlayState.instance == null || PlayState.instance.currentStage == null) return;
+		if (PlayState.instance.isMinimalMode) return;
+
+        switch(data.value.strumline) {
+			case 'playerStrumline':
+                ModuleHandler.getModule('SwappingNotestyles').scriptCall('swapPlayerStrumlines', [data.value.notestyle]);
+			case 'opponentStrumline':
+                ModuleHandler.getModule('SwappingNotestyles').scriptCall('swapOpponentStrumlines', [data.value.notestyle]);
+			case 'both':
+                ModuleHandler.getModule('SwappingNotestyles').scriptCall('swapStrumlines', [data.value.notestyle]);
+		} 
+	}
+
+	public function getEventSchema() {
+        var noteStyles = ["Funkin'" => "funkin", "Pixel" => "pixel"];
+		var noteStyleIds:Array<String> = NoteStyleRegistry.instance.listEntryIds();
+	
+		for (noteStyleId in noteStyleIds)
+		{
+		  var noteStyle:Null<NoteStyle> = NoteStyleRegistry.instance.fetchEntry(noteStyleId);
+		  if (noteStyle == null) continue;
+		  noteStyles.set(noteStyle.getName(), noteStyleId);
+		}
+		return [
+            {
+                name: "strumline",
+                title: "Strumline",
+                defaultValue: "playerStrumline",
+				type: "enum",
+				keys: [
+					"Player" => "playerStrumline",
+                    "Opponent" => "opponentStrumline",
+                    "Both" => "both"
+				]
+            },
+            {
+                name: "notestyle",
+                title: "Notestyle",
+                defaultValue: "funkin",
+                type: "enum",
+                keys: noteStyles,
+            }
+		];
+	}
+
+	public function getTitle() {
+		return "Notestyle Swapper";
+	}
+	
+	public function new() {
+		super('NoteSwapEvent');
+	}
+}
+
+class SwappingNotestyles extends Module
+{
+	function new()
+	{
+		super('SwappingNotestyles');
+	}
+
+	override function onSongLoaded(event) {
+		super.onSongLoaded(event);
+		var cachedStyles:Array<String> = [];
+		var noteStyleIds:Array<String> = NoteStyleRegistry.instance.listEntryIds();
+		for (events in event.events){
+			if (events.eventKind == 'NoteSwapEvent'){
+				if (NoteStyleRegistry.instance.fetchEntry(events.value.notestyle) != null && !cachedStyles.contains(events.value.notestyle)){
+					cachedStyles.push(events.value.notestyle);
+					var notestyle = NoteStyleRegistry.instance.fetchEntry(events.value.notestyle);
+					notestyle.buildNoteFrames(true);
+					notestyle.buildHoldCoverFrames(true);
+					notestyle.buildSplashFrames(true);
+				}
+			}
+		}
+	}	
+
+	var hasTriggeredEvent:Bool = false;
+	
+    function swapPlayerStrumlines(stylePlayer:String){
+		newPopUps(stylePlayer);
+		hasTriggeredEvent = true;
+		setupNotes(PlayState.instance.playerStrumline, stylePlayer);
+	}
+
+	function setupNotes(strumline:Strumline, style:String){
+		var noteStyleId:String = style;
+		var noteStyle:NoteStyle = NoteStyleRegistry.instance.fetchEntry(noteStyleId) ?? NoteStyleRegistry.instance.fetchDefault();
+		var ogNoteStyle = strumline.noteStyle;
+		strumline.noteStyle = noteStyle;
+
+		// Clear all notesplashes and hold covers
+		strumline.noteSplashes.clear();
+		strumline.noteHoldCovers.clear();
+
+		// --- 判定ライン（Receptor）の更新 ---
+		for (i in 0...Strumline.KEY_COUNT)
+		{
+			// 既存のノーツを削除せず取得
+			var child:StrumlineNote = strumline.strumlineNotes.members[i];
+			
+			// 1. 画像変更前の「中心座標」を記録（Modchart等の移動も含まれた位置）
+			var oldCenterX:Float = child.x + (child.width / 2);
+			var oldCenterY:Float = child.y + (child.height / 2);
+
+			// 2. 新しいスタイルを適用（画像とアニメーションの差し替え）
+			noteStyle.applyStrumlineFrames(child);
+			noteStyle.applyStrumlineAnimations(child, Strumline.DIRECTIONS[i]);
+			
+			// --- 修正: モバイル等のMiniMode倍率（strumlineScale）を考慮してサイズを設定 ---
+			var styleScale = noteStyle.getStrumlineScale();
+			child.scale.set(
+				styleScale * strumline.strumlineScale.x, 
+				styleScale * strumline.strumlineScale.y
+			);
+			
+			// 3. アニメーション再生とヒットボックス更新
+			child.playStatic();
+			child.updateHitbox();
+			
+			// 4. カスタムオフセットの適用
+			noteStyle.applyStrumlineOffsets(child);
+
+			// 5. 位置の補正
+			// サイズが変わっても「中心」が同じ位置になるように x, y を調整する
+			child.x = oldCenterX - (child.width / 2);
+			child.y = oldCenterY - (child.height / 2);
+		}		
+
+		// --- 移動ノーツ（Notes）の更新 ---
+		for (notes in strumline.notes){
+			var noteKindStyle:NoteStyle = NoteKindManager.getNoteStyle(notes.kind, strumline.noteStyle.id) ?? noteStyle;
+			
+			notes.setupNoteGraphic(noteKindStyle);
+			
+			// --- 修正: ノーツにもMiniMode倍率を適用 ---
+			notes.scale.x *= strumline.strumlineScale.x;
+			notes.scale.y *= strumline.strumlineScale.y;
+			
+			notes.playNoteAnimation(notes.noteData.getDirection());
+			
+			if (notes.get_isHoldNote()) {
+				// ロングノーツの中心X位置を記録
+				var oldHoldCenterX:Float = notes.holdNoteSprite.x + (notes.holdNoteSprite.width / 2);
+
+				notes.holdNoteSprite.setupHoldNoteGraphic(noteStyle);
+				notes.holdNoteSprite.noteStyleOffsets = noteStyle.getHoldNoteOffsets();
+				notes.holdNoteSprite.graphicWidth = notes.holdNoteSprite.graphic.width / 8 * notes.holdNoteSprite.zoom;
+				
+				// amount of notes * 2
+				notes.holdNoteSprite.graphicHeight = notes.holdNoteSprite.sustainLength * Constants.PIXELS_PER_MS * (strumline?.scrollSpeed ?? 1.0);			
+	
+				notes.holdNoteSprite.updateHitbox();	
+				notes.holdNoteSprite.updateClipping();
+				notes.holdNoteSprite.updateColorTransform();
+
+				// ロングノーツの位置補正（中心Xを維持）
+				notes.holdNoteSprite.x = oldHoldCenterX - (notes.holdNoteSprite.width / 2);
+
+				// Replay hold cover anim
+				if (notes.holdNoteSprite.hitNote){
+					strumline.playNoteHoldCover(notes.holdNoteSprite);
+				}
+			}
+			strumline.onNoteIncoming.dispatch(notes); 
+		}
+	}
+
+	function swapOpponentStrumlines(styleOpponent:String){
+		hasTriggeredEvent = true;
+		setupNotes(PlayState.instance.opponentStrumline, styleOpponent);
+	}
+
+	function newPopUps(newComboStyle:String){
+		var noteStyleId:String = newComboStyle;
+		var noteStyle:NoteStyle = NoteStyleRegistry.instance.fetchEntry(noteStyleId) ?? NoteStyleRegistry.instance.fetchDefault();
+		// Initialize the judgements and combo meter.
+		PlayState.instance.comboPopUps.noteStyle = noteStyle;
+	}
+
+
+	function swapStrumlines(style:String){
+		newPopUps(style);
+		hasTriggeredEvent = true;
+		setupNotes(PlayState.instance.playerStrumline, style);
+		setupNotes(PlayState.instance.opponentStrumline, style);
+	}
+
+	override function onSongRetry(event) {
+		super.onSongRetry(event);
+		if (hasTriggeredEvent) {
+			swapStrumlines(PlayState.instance.currentChart.noteStyle);
+			hasTriggeredEvent = false;
+		}
+	}	
+}

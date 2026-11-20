@@ -1,0 +1,207 @@
+{
+	"version": "1.0.0",
+	"renderType": "multianimateatlas",
+	"offsets": [
+		0,
+		0
+	],
+	"danceEvery": 1,
+	"applyStageMatrix": false,
+	"scale": 0.9,
+	"name": "Bf",
+	"flipX": true,
+	"cameraOffsets": [
+		0,
+		0
+	],
+	"isPixel": false,
+	"singTime": 4,
+	"startingAnimation": "idle",
+	"healthIcon": {
+		"isPixel": false,
+		"offsets": [
+			0,
+			0
+		],
+		"scale": 1,
+		"flipX": false,
+		"id": "nofb"
+	},
+	"assetPath": "shared:characters/bf/main",
+	"atlasSettings": {
+		"swfMode": true,
+		"applyStageMatrix": false,
+		"useRenderTexture": false,
+		"filterQuality": 1,
+		"cacheOnLoad": false
+	},
+	"animations": [
+		{
+			"offsets": [
+				24,
+				50
+			],
+			"frameIndices": [],
+			"prefix": "expiort/idle",
+			"name": "idle",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				23,
+				51
+			],
+			"frameIndices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				4,
+				4,
+				4,
+				4
+			],
+			"prefix": "expiort/mLeft",
+			"name": "singLEFTmiss",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-25,
+				44
+			],
+			"frameIndices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				4,
+				4,
+				4,
+				4
+			],
+			"prefix": "expiort/mDown",
+			"name": "singDOWNmiss",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				68,
+				198
+			],
+			"frameIndices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				4,
+				4,
+				4,
+				4
+			],
+			"prefix": "expiort/mUp",
+			"name": "singUPmiss",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				87,
+				184
+			],
+			"frameIndices": [
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				5,
+				5,
+				5,
+				5
+			],
+			"prefix": "expiort/mRight",
+			"name": "singRIGHTmiss",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-32,
+				123
+			],
+			"frameIndices": [],
+			"prefix": "expiort/left",
+			"name": "singLEFT",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				40,
+				93
+			],
+			"frameIndices": [],
+			"prefix": "expiort/down",
+			"name": "singDOWN",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-15,
+				136
+			],
+			"frameIndices": [],
+			"prefix": "expiort/right",
+			"name": "singRIGHT",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-51,
+				143
+			],
+			"frameIndices": [],
+			"prefix": "expiort/up",
+			"name": "singUP",
+			"looped": false,
+			"flipX": false,
+			"animType": "framelabel",
+			"flipY": false,
+			"frameRate": 24
+		}
+	]
+}

@@ -1,0 +1,104 @@
+import funkin.play.event.SongEvent;
+import funkin.play.PlayState;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import openfl.filters.ShaderFilter;
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.utils.Assets;
+
+class BaldsPixelateCameraEvent extends SongEvent
+{
+    var shader:FlxRuntimeShader;
+    var filter:ShaderFilter;
+    var tween:FlxTween;
+
+    public function new()
+    {
+        super("PixelateCamera");
+    }
+
+    override function handleEvent(data:Dynamic):Void
+    {
+        var play = PlayState.instance;
+        if (play == null) return;
+
+        var startSize:Float = data.getFloat("startSize");
+        var endSize:Float   = data.getFloat("endSize");
+        var duration:Float  = data.getFloat("duration");
+        var fadeIn:Bool     = data.getBool("fadeIn");
+        var fadeOut:Bool    = data.getBool("fadeOut");
+
+        if (shader == null)
+        {
+            shader = new FlxRuntimeShader(
+                Assets.getText(Paths.frag("pixelation"))
+            );
+            filter = new ShaderFilter(shader);
+        }
+
+        if (play.camGame.filters == null)
+            play.camGame.filters = [filter];
+        else if (!play.camGame.filters.contains(filter))
+            play.camGame.filters.push(filter);
+
+        if (!fadeIn && !fadeOut)
+        {
+            shader.setFloat("size", endSize);
+            if (endSize <= 0) removeShader();
+            return;
+        }
+
+        if (fadeIn && fadeOut)
+        {
+            tween = FlxTween.num(startSize, endSize, duration / 2,
+                { ease: FlxEase.linear },
+                v -> shader.setFloat("size", v)
+            ).onComplete = _ ->
+            {
+                tween = FlxTween.num(endSize, 0, duration / 2,
+                    { ease: FlxEase.linear },
+                    v -> shader.setFloat("size", v)
+                ).onComplete = _ -> removeShader();
+            };
+        }
+        else if (fadeIn)
+        {
+            tween = FlxTween.num(startSize, endSize, duration,
+                { ease: FlxEase.linear },
+                v -> shader.setFloat("size", v)
+            );
+        }
+        else if (fadeOut)
+        {
+            tween = FlxTween.num(startSize, 0, duration,
+                { ease: FlxEase.linear },
+                v -> shader.setFloat("size", v)
+            ).onComplete = _ -> removeShader();
+        }
+    }
+
+    function removeShader()
+    {
+        var play = PlayState.instance;
+        if (play == null) return;
+
+        if (play.camGame.filters != null)
+            play.camGame.filters.remove(filter);
+    }
+
+    override function getTitle():String
+    {
+        return "Pixelate Camera";
+    }
+
+    override function getEventSchema():Dynamic
+    {
+        return [
+            { name: "startSize", title: "Start Pixel Size", type: "float", defaultValue: 0 },
+            { name: "endSize", title: "End Pixel Size", type: "float", defaultValue: 25 },
+            { name: "duration", title: "Duration (sec)", type: "float", defaultValue: 1 },
+            { name: "fadeIn", title: "Fade In", type: "bool", defaultValue: true },
+            { name: "fadeOut", title: "Fade Out", type: "bool", defaultValue: false }
+        ];
+    }
+}

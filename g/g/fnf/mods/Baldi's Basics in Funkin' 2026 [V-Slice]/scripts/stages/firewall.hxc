@@ -1,0 +1,382 @@
+import flixel.FlxSprite;
+import flixel.math.FlxMath;
+import flixel.util.FlxGradient;
+import openfl.filters.ShaderFilter;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.graphics.shaders.DropShadowShader;
+import funkin.play.stage.Stage;
+import funkin.graphics.FunkinSprite;
+import funkin.Paths;
+import funkin.play.character.BaseCharacter;
+import funkin.play.character.CharacterType;
+import funkin.modding.events.ScriptEvent;
+import flixel.FlxG;
+
+class FirewallStage extends Stage
+{
+	var bg:FunkinSprite;
+	var bg2:FunkinSprite;
+	var bgGradient:FunkinSprite;
+	var cloudsBehind:FunkinSprite;
+	var skyGraphic:FunkinSprite;
+	var bluescreen:FunkinSprite;
+	var clouds:FunkinSprite;
+	var tree:FunkinSprite;
+	var treeLeaves:FunkinSprite;
+	var rock:FunkinSprite;
+	var stones:FunkinSprite;
+	var floor:FunkinSprite;
+	var chains:FunkinSprite;
+	var chainsRight:FunkinSprite;
+	var fgL:FunkinSprite;
+	var fgR:FunkinSprite;
+	var gradient:FlxSprite;
+
+	var meteors:Array<FunkinSprite> = [];
+	var blueTargets:Array<FlxSprite> = [];
+
+	var stageScale:Float = 3;
+	var floatTime:Float = 0;
+	var skyBaseY:Float = 0;
+
+	var bfCharacter:BaseCharacter;
+	var bfRim:DropShadowShader;
+	var stageBlueShader:AdjustColorShader;
+	var bfShadowApplied:Bool = false;
+
+	var meltShader:MeltGlitch;
+	var meltFilter:ShaderFilter;
+	var meltPresence:Float = 0;
+	var meltTarget:Float = 0;
+	var meltStarted:Bool = false;
+
+	static inline var SHADOW_STEP:Int = 864;
+	static inline var MELT_STEP:Int = 1376;
+	static inline var STAGE_RED:Int = 0xFFFF4A4A;
+
+	override function new()
+	{
+		super('firewall');
+	}
+
+	function trackBlueTarget(sprite:FlxSprite):Void
+	{
+		blueTargets.push(sprite);
+	}
+
+	function setStageRed():Void
+	{
+		for (sprite in blueTargets)
+		{
+			sprite.shader = null;
+			sprite.color = STAGE_RED;
+		}
+	}
+
+	function setStageBlue():Void
+	{
+		for (sprite in blueTargets)
+		{
+			sprite.shader = stageBlueShader;
+			sprite.color = 0xFFFFFFFF;
+		}
+	}
+
+	function bringGradientToFront():Void
+	{
+		if (gradient != null)
+		{
+			remove(gradient, true);
+			add(gradient);
+		}
+	}
+
+	override function buildStage():Void
+	{
+		super.buildStage();
+
+		stageBlueShader = new AdjustColorShader();
+		stageBlueShader.saturation = 100;
+		stageBlueShader.brightness = 0;
+		stageBlueShader.contrast = 0;
+		stageBlueShader.hue = 220;
+
+		meltShader = new MeltGlitch();
+		meltShader.setFloat('meltPresence', 0);
+		meltShader.setFloat('mosaic', 0.01);
+		meltFilter = new ShaderFilter(meltShader);
+		FlxG.camera.filters = [meltFilter];
+
+		var dir = "stages/firewall/";
+
+		bg = new FunkinSprite(-1400, -500);
+		bg.loadGraphic(Paths.image(dir + "mainbg"));
+		bg.scrollFactor.set(0.2, 0.2);
+		bg.scale.set(stageScale, stageScale);
+		bg.updateHitbox();
+		add(bg);
+		trackBlueTarget(bg);
+
+		bg2 = new FunkinSprite(-300, -150);
+		bg2.loadGraphic(Paths.image(dir + "mainbg"));
+		bg2.scrollFactor.set(0.2, 0.2);
+		bg2.scale.set(stageScale, stageScale);
+		bg2.alpha = 0.3;
+		bg2.updateHitbox();
+		add(bg2);
+		trackBlueTarget(bg2);
+
+		bgGradient = new FunkinSprite(bg.x, bg.y);
+		bgGradient.loadGraphic(Paths.image(dir + "gradient_back"));
+		bgGradient.scrollFactor.set(0.2, 0.2);
+		bgGradient.scale.set(stageScale, stageScale);
+		bgGradient.updateHitbox();
+		add(bgGradient);
+		trackBlueTarget(bgGradient);
+
+		cloudsBehind = new FunkinSprite(bg.x + (53 * stageScale), bg.y);
+		cloudsBehind.loadGraphic(Paths.image(dir + "cloudsbehindschool"));
+		cloudsBehind.scrollFactor.set(0.5, 0.5);
+		cloudsBehind.scale.set(stageScale, stageScale);
+		cloudsBehind.updateHitbox();
+		add(cloudsBehind);
+		trackBlueTarget(cloudsBehind);
+
+		skyGraphic = new FunkinSprite(bg.x + 497 * stageScale, bg.y + 26 * stageScale);
+		skyGraphic.loadGraphic(Paths.image(dir + "school"));
+		skyGraphic.scrollFactor.set(0.6, 0.6);
+		skyGraphic.scale.set(stageScale, stageScale);
+		skyGraphic.updateHitbox();
+		add(skyGraphic);
+		trackBlueTarget(skyGraphic);
+
+		for (i in 0...3)
+		{
+			var meteor = new FunkinSprite();
+			meteor.loadSparrow(dir + "meteor");
+			meteor.animation.addByPrefix("idle", "meteor", 24, true);
+			meteor.animation.play("idle");
+			meteor.flipX = true;
+			meteor.scale.set(0.8, 0.8);
+			meteor.scrollFactor.set(0.2, 0.2);
+			meteor.updateHitbox();
+			meteor.velocity.set(1800, 1800);
+			add(meteor);
+			trackBlueTarget(meteor);
+			meteors.push(meteor);
+		}
+
+		bluescreen = new FunkinSprite(bg.x + 397 * stageScale + 300, bg.y + 26 * stageScale - 200);
+		bluescreen.loadGraphic(Paths.image(dir + "bluescreen"));
+		bluescreen.scrollFactor.set(0.6, 0.6);
+		bluescreen.scale.set(stageScale, stageScale);
+		bluescreen.visible = false;
+		bluescreen.color = 0xFFFFFFFF;
+		bluescreen.updateHitbox();
+		add(bluescreen);
+
+		clouds = new FunkinSprite(bg.x + 393 * stageScale, bg.y + 24 * stageScale);
+		clouds.loadGraphic(Paths.image(dir + "clouds"));
+		clouds.scrollFactor.set(0.7, 0.7);
+		clouds.scale.set(stageScale, stageScale);
+		clouds.updateHitbox();
+		add(clouds);
+		trackBlueTarget(clouds);
+
+		tree = new FunkinSprite(bg.x + 1274 * stageScale, bg.y + 227 * stageScale);
+		tree.loadGraphic(Paths.image(dir + "tree"));
+		tree.scrollFactor.set(0.8, 0.8);
+		tree.scale.set(stageScale, stageScale);
+		tree.updateHitbox();
+		add(tree);
+		trackBlueTarget(tree);
+
+		treeLeaves = new FunkinSprite(bg.x + 1235 * stageScale, bg.y + 155 * stageScale);
+		treeLeaves.loadSparrow(dir + "treeleaves");
+		treeLeaves.animation.addByPrefix("idle", "leaf anim", 24, true);
+		treeLeaves.animation.play("idle");
+		treeLeaves.scrollFactor.set(0.8, 0.8);
+		treeLeaves.scale.set(stageScale, stageScale);
+		treeLeaves.updateHitbox();
+		add(treeLeaves);
+		trackBlueTarget(treeLeaves);
+
+		rock = new FunkinSprite(bg.x + 279 * stageScale, bg.y + 407 * stageScale);
+		rock.loadGraphic(Paths.image(dir + "randomrock"));
+		rock.scrollFactor.set(0.85, 0.85);
+		rock.scale.set(stageScale, stageScale);
+		rock.updateHitbox();
+		add(rock);
+		trackBlueTarget(rock);
+
+		stones = new FunkinSprite(bg.x + 851 * stageScale, bg.y + 407 * stageScale);
+		stones.loadGraphic(Paths.image(dir + "stepping_stones"));
+		stones.scrollFactor.set(0.9, 0.9);
+		stones.scale.set(stageScale, stageScale);
+		stones.updateHitbox();
+		add(stones);
+		trackBlueTarget(stones);
+
+		floor = new FunkinSprite(bg.x + 391 * stageScale, bg.y + 528 * stageScale);
+		floor.loadGraphic(Paths.image(dir + "platform"));
+		floor.scale.set(stageScale, stageScale);
+		floor.updateHitbox();
+		add(floor);
+		trackBlueTarget(floor);
+
+		chains = new FunkinSprite(bg.x + 165 * stageScale, bg.y + 423 * stageScale);
+		chains.loadGraphic(Paths.image(dir + "chain_left"));
+		chains.scale.set(stageScale, stageScale);
+		chains.updateHitbox();
+		add(chains);
+		trackBlueTarget(chains);
+
+		chainsRight = new FunkinSprite(bg.x + (165 + 1108) * stageScale, bg.y + (423 + 55) * stageScale);
+		chainsRight.loadGraphic(Paths.image(dir + "chain_right"));
+		chainsRight.scale.set(stageScale, stageScale);
+		chainsRight.updateHitbox();
+		add(chainsRight);
+		trackBlueTarget(chainsRight);
+
+		fgL = new FunkinSprite(bg.x + 200, bg.y + 105 * stageScale);
+		fgL.loadGraphic(Paths.image(dir + "foreground_stonesLeft"));
+		fgL.scrollFactor.set(1.1, 1.1);
+		fgL.scale.set(stageScale, stageScale);
+		fgL.updateHitbox();
+		add(fgL);
+		trackBlueTarget(fgL);
+
+		fgR = new FunkinSprite(bg.x + 200 + (1587 * stageScale), bg.y + 105 * stageScale + (23 * stageScale));
+		fgR.loadGraphic(Paths.image(dir + "foreground_stonesRight"));
+		fgR.scrollFactor.set(1.1, 1.1);
+		fgR.scale.set(stageScale, stageScale);
+		fgR.updateHitbox();
+		add(fgR);
+		trackBlueTarget(fgR);
+
+		gradient = FlxGradient.createGradientFlxSprite(1, Std.int(bg.height), [0x00000000, 0xFFFF001E]);
+		gradient.scale.x = bg.width;
+		gradient.alpha = 0.2;
+		gradient.scrollFactor.set(1.1, 1.1);
+		gradient.updateHitbox();
+		add(gradient);
+		trackBlueTarget(gradient);
+
+		bg.x -= bg.width / 4;
+		bg.y -= bg.height / 4;
+
+		bgGradient.x = bg.x;
+		bgGradient.y = bg.y;
+
+		gradient.setPosition(bg.x + 1600, bg.y + 700);
+
+		skyGraphic.x -= 900;
+		skyGraphic.y -= 400;
+
+		clouds.x -= 600;
+		clouds.y -= 400;
+
+		tree.x -= 200;
+		treeLeaves.x -= 200;
+
+		rock.x -= 300;
+		rock.y -= 300;
+
+		bg.x += 500;
+
+		skyBaseY = skyGraphic.y;
+
+		setStageRed();
+		bluescreen.color = 0xFFFFFFFF;
+		bringGradientToFront();
+	}
+
+	override function addCharacter(character:BaseCharacter, charType:CharacterType):Void
+	{
+		super.addCharacter(character, charType);
+
+		if (charType == CharacterType.BF)
+		{
+			bfCharacter = character;
+			bfCharacter.color = 0xFFFFFFFF;
+
+			bfRim = new DropShadowShader();
+			bfRim.setAdjustColor(-46, -38, -25, -20);
+			bfRim.color = 0xFFFF0000;
+			bfRim.angle = 120;
+			bfRim.threshold = 0.3;
+			bfRim.distance = 55;
+			bfRim.attachedSprite = character;
+
+			character.shader = bfRim;
+
+			character.animation.onFrameChange.add(function()
+			{
+				if (bfRim != null && getBoyfriend() != null)
+				{
+					bfRim.updateFrameInfo(getBoyfriend().frame);
+				}
+			});
+		}
+
+		bringGradientToFront();
+	}
+
+	override function onStepHit(event:ScriptEvent):Void
+	{
+		super.onStepHit(event);
+
+		if (!bfShadowApplied && bfRim != null && bfCharacter != null && event.step >= SHADOW_STEP)
+		{
+			setStageBlue();
+			bluescreen.color = 0xFFFFFFFF;
+			bluescreen.visible = true;
+			bfRim.color = 0xFF2F7DFF;
+			bfRim.distance = 25;
+			bfCharacter.color = 0xFFFFFFFF;
+			bfCharacter.shader = bfRim;
+			bfShadowApplied = true;
+		}
+
+		if (!meltStarted && event.step >= MELT_STEP)
+		{
+			meltStarted = true;
+			meltTarget = 0.95;
+		}
+
+		bringGradientToFront();
+	}
+
+	override function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+
+		floatTime += elapsed;
+
+		if (meltShader != null)
+		{
+			meltPresence += (meltTarget - meltPresence) * Math.min(1, elapsed * 3.2);
+			if (meltPresence < 0) meltPresence = 0;
+			if (meltPresence > 1) meltPresence = 1;
+
+			meltShader.setFloat('meltPresence', meltPresence);
+			meltShader.setFloat('mosaic', 0.01);
+		}
+
+		var sinMovement:Float = 8.2 * FlxMath.fastSin(Math.PI * floatTime * 0.8);
+		skyGraphic.y = skyBaseY + (sinMovement * 0.5);
+
+		var minX = bg.x - 800;
+		var maxX = bg.x + bg.width + 800;
+		var minY = bg.y - 800;
+		var maxY = bg.y + bg.height + 800;
+
+		for (meteor in meteors)
+		{
+			meteor.x = FlxMath.wrap(meteor.x, minX, maxX);
+			meteor.y = FlxMath.wrap(meteor.y, minY, maxY);
+		}
+
+		bringGradientToFront();
+	}
+}

@@ -1,0 +1,102 @@
+import funkin.play.notes.notekind.ScriptedNoteKind;
+import funkin.modding.events.HitNoteScriptEvent;
+import flixel.FlxG;
+import funkin.play.PlayState;
+import flixel.util.FlxTimer;
+import funkin.play.character.BaseCharacter;
+import funkin.play.notes.Strumline;
+import Reflect;
+import Std;
+
+class PlayAnimationNote extends ScriptedNoteKind
+{
+    function new()
+    {
+        super(
+            "play-anim",
+            "Play Animation Note",
+            " ",
+            [
+                {
+                    name: "animation",
+                    description: "Animation",
+                    type: "String",
+                    data: { defaultValue: "idle" }
+                },
+                {
+                    name: "force",
+                    description: "Force",
+                    type: "Int",
+                    min: 0,
+                    max: 1,
+                    data: { defaultValue: 0 }
+                }
+            ]
+        );
+
+        this.noteStyleId = noteStyleId;
+    }
+
+    override public function onNoteHit(e:HitNoteScriptEvent):Void
+    {
+        if (e == null || e.note == null || e.note.noteData == null)
+            return;
+
+        if (PlayState.instance == null || PlayState.instance.currentStage == null)
+            return;
+
+        // --- BETTER animation param handling ---
+        var animToPlay:String = "idle";
+        var forced:Bool = false;
+
+        var noteParams:Array<Dynamic> = e.note.noteData.params;
+        if (noteParams != null)
+        {
+            for (i in 0...noteParams.length)
+            {
+                var p:Dynamic = noteParams[i];
+                if (p == null) continue;
+
+                var name:Dynamic = Reflect.field(p, "name");
+                if (name == "animation")
+                {
+                    var value:Dynamic = Reflect.field(p, "value");
+                    if (value != null)
+                        animToPlay = Std.string(value);
+                    break;
+                }
+                else if (name == "force")
+                {
+                    var value:Dynamic = Reflect.field(p, "value");
+                    if (value != null)
+                        forced = Std.bool(value);
+                    break;
+                }
+            }
+        }
+
+        // Determine hitter character
+        var hitter:BaseCharacter;
+        if (e.note.noteData.getMustHitNote != null && e.note.noteData.getMustHitNote(Strumline.KEY_COUNT))
+            hitter = PlayState.instance.currentStage.getBoyfriend();
+        else
+            hitter = PlayState.instance.currentStage.getDad();
+
+        if (hitter == null)
+            return;
+
+        hitter.canPlayOtherAnims = false;
+
+        new FlxTimer().start(0, function(_) {
+            charPlayAnim(hitter, animToPlay, forced);
+            hitter.applyAnimationOffsets(animToPlay);
+        });
+    }
+
+    public function charPlayAnim(character:BaseCharacter, name:String, ?force:Bool) {
+        character.canPlayOtherAnims = true;
+        if (!character.ignoreExclusionPref.contains(name))
+            character.ignoreExclusionPref.push(name);
+        character.playAnimation(name, force ?? false, force ?? false);
+    }
+}

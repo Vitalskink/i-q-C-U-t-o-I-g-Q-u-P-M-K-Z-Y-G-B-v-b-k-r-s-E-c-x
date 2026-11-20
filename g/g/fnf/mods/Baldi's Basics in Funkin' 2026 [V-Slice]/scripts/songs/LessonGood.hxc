@@ -1,0 +1,122 @@
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.PlayStatePlaylist;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Paths;
+import funkin.play.cutscene.VideoCutscene;
+
+class LessonGoodCredits extends Song
+{
+    var creditsImage:FlxSprite;
+    var titleText:FlxText;
+    var byText:FlxText;
+    var hasPlayedCutscene:Bool;
+
+    public function new()
+    {
+        super("lesson-good");
+        hasPlayedCutscene = false;
+    }
+
+    override function onCreate()
+    {
+        super.onCreate();
+
+        hasPlayedCutscene = false;
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        creditsImage = new FlxSprite();
+        creditsImage.loadGraphic(Paths.image("ui/credits"));
+        creditsImage.setGraphicSize(Std.int(creditsImage.width * 0.85));
+        creditsImage.updateHitbox();
+        creditsImage.cameras = [game.camHUD];
+        creditsImage.x = 40;
+        creditsImage.y = game.camHUD.height + 200;
+        creditsImage.zIndex = 9999;
+        game.add(creditsImage);
+
+        titleText = new FlxText();
+        titleText.text = "Lesson";
+        titleText.setFormat(Paths.font("comic.ttf"), 40, 0xFF00FF00, "left");
+        titleText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3);
+        titleText.cameras = [game.camHUD];
+        titleText.zIndex = 10000;
+        game.add(titleText);
+
+        byText = new FlxText();
+        byText.text = "By xyy,Anthony Hampton & headdzo";
+        byText.setFormat(Paths.font("comic.ttf"), 34, 0xFFFFFFFF, "left");
+        byText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3);
+        byText.cameras = [game.camHUD];
+        byText.zIndex = 10000;
+        game.add(byText);
+    }
+
+    override function onCountdownStart(event:CountdownScriptEvent):Void
+    {
+        super.onCountdownStart(event);
+
+        if (!PlayStatePlaylist.isStoryMode)
+        {
+            hasPlayedCutscene = true;
+        }
+
+        if (!hasPlayedCutscene)
+        {
+            hasPlayedCutscene = true;
+            event.cancel();
+            VideoCutscene.play(Paths.videos("lesson-good"));
+        }
+    }
+
+    override function onSongRetry(event:ScriptEvent)
+    {
+        super.onSongRetry(event);
+        hasPlayedCutscene = true;
+    }
+
+    override function onSongStart()
+    {
+        super.onSongStart();
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        var targetY = game.camHUD.height - creditsImage.height;
+
+        FlxTween.tween(creditsImage, { y: targetY }, 0.7, { ease: FlxEase.quadOut });
+
+        FlxTween.tween(creditsImage,
+            { y: game.camHUD.height + 200 },
+            0.7,
+            { startDelay: 4.0, ease: FlxEase.quadIn }
+        );
+    }
+
+    override function onUpdate(elapsed:Float)
+    {
+        super.onUpdate(elapsed);
+
+        if (creditsImage != null)
+        {
+            titleText.x = creditsImage.x + 70 + 250;
+            titleText.y = creditsImage.y + creditsImage.height - 120 - 180;
+
+            byText.x = creditsImage.x + 70 + 250;
+            byText.y = creditsImage.y + creditsImage.height - 60 - 180;
+        }
+    }
+
+    override function onDestroy()
+    {
+        if (creditsImage != null) creditsImage.destroy();
+        if (titleText != null) titleText.destroy();
+        if (byText != null) byText.destroy();
+    }
+}

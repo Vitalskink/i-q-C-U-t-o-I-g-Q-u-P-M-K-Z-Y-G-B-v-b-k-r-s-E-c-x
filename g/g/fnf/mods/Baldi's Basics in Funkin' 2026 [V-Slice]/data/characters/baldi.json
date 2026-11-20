@@ -1,0 +1,362 @@
+{
+	"version": "1.0.0",
+	"renderType": "multianimateatlas",
+	"offsets": [
+		0,
+		0
+	],
+	"danceEvery": 1,
+	"applyStageMatrix": false,
+	"scale": 1,
+	"name": "Baldi",
+	"flipX": false,
+	"cameraOffsets": [
+		0,
+		0
+	],
+	"isPixel": false,
+	"singTime": 6.1,
+	"startingAnimation": "idle",
+	"healthIcon": {
+		"offsets": [
+			0,
+			0
+		],
+		"isPixel": false,
+		"scale": 1,
+		"id": "baldi",
+		"flipX": false
+	},
+	"assetPath": "shared:characters/baldi/core",
+	"atlasSettings": {
+		"applyStageMatrix": false,
+		"useRenderTexture": false,
+		"filterQuality": 1,
+		"cacheOnLoad": false,
+		"swfMode": true
+	},
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"frameIndices": [],
+			"prefix": ".export/idle",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "idle",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-12,
+				-9
+			],
+			"frameIndices": [],
+			"prefix": ".export/left",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singLEFT",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				8,
+				0
+			],
+			"frameIndices": [],
+			"prefix": ".export/down",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singDOWN",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-13,
+				-3
+			],
+			"frameIndices": [],
+			"prefix": ".export/up",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singUP",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				19,
+				-6
+			],
+			"frameIndices": [],
+			"prefix": ".export/right",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singRIGHT",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				0,
+				1
+			],
+			"frameIndices": [],
+			"prefix": ".export/good one",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "goodOne",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-2,
+				1
+			],
+			"frameIndices": [],
+			"prefix": ".export/bad one",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "badOne",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"frameIndices": [],
+			"prefix": ".export/upset idle",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "idle-upset",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-4,
+				-7
+			],
+			"frameIndices": [],
+			"prefix": ".export/upset left",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singLEFT-upset",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				12,
+				0
+			],
+			"frameIndices": [],
+			"prefix": ".export/upset down",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singDOWN-upset",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-4,
+				-3
+			],
+			"frameIndices": [],
+			"prefix": ".export/upset up",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singUP-upset",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				7,
+				-10
+			],
+			"frameIndices": [],
+			"prefix": ".export/upset right",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singRIGHT-upset",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-20,
+				23
+			],
+			"frameIndices": [],
+			"prefix": ".export/annoyed idle",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "idle-annoyed",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-35,
+				18
+			],
+			"frameIndices": [],
+			"prefix": ".export/annoyed left",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singLEFT-annoyed",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-34,
+				19
+			],
+			"frameIndices": [],
+			"prefix": ".export/annoyed down",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singDOWN-annoyed",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-19,
+				13
+			],
+			"frameIndices": [],
+			"prefix": ".export/annoyed up",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singUP-annoyed",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-30,
+				17
+			],
+			"frameIndices": [],
+			"prefix": ".export/annoyed right",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singRIGHT-annoyed",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-28,
+				108
+			],
+			"frameIndices": [],
+			"prefix": ".export/mad idle",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "idle-mad",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-38,
+				99
+			],
+			"frameIndices": [],
+			"prefix": ".export/mad left",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singLEFT-mad",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-46,
+				108
+			],
+			"frameIndices": [],
+			"prefix": ".export/mad down",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singDOWN-mad",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-34,
+				104
+			],
+			"frameIndices": [],
+			"prefix": ".export/mad up",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singUP-mad",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				-27,
+				107
+			],
+			"frameIndices": [],
+			"prefix": ".export/mad right",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "singRIGHT-mad",
+			"flipY": false,
+			"frameRate": 24
+		},
+		{
+			"offsets": [
+				2,
+				0
+			],
+			"frameIndices": [],
+			"prefix": ".export/AHEM",
+			"animType": "framelabel",
+			"flipX": false,
+			"looped": false,
+			"name": "ahem",
+			"flipY": false,
+			"frameRate": 24
+		}
+	]
+}

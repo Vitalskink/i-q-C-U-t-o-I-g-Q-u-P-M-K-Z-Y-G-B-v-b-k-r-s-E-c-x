@@ -1,0 +1,405 @@
+import funkin.modding.module.Module;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.FlxG;
+import flixel.tweens.FlxTween;
+import funkin.Paths;
+import funkin.Conductor;
+import flixel.FlxCamera;
+import flixel.FlxSprite;
+import flixel.math.FlxPoint;
+import funkin.play.PlayState;
+import funkin.play.character.CharacterDataParser;
+import funkin.graphics.FunkinSprite;
+import funkin.util.TouchUtil;
+import funkin.util.GRhythmUtil;
+import funkin.input.PreciseInputManager;
+import StringTools;
+import funkin.play.PlayStatePlaylist;
+
+class Thinkpad extends Module
+{
+    function new(){
+        super("Thinkpad");
+    }
+
+var mathResolver:MathResolver;
+
+//
+var markers:Array<FlxSprite> = [];
+var markerIdx = 0;
+
+//
+var underlay:FlxSprite;
+var atlas:Character;
+var thinkPad:FlxSprite;
+var atlasCover:AttachedSprite; // stupid
+var thinkPadText:FlxText;
+var typedText:FlxText;
+var bfAtlas:FunkinSprite = null;
+var garbledTexts:Array<FlxText> = [];
+
+//
+
+var thinkCam = null;
+
+function onSongLoaded(event)
+{
+	markerIdx = 0;
+	if (!FlxG.cameras.list.contains(thinkCam))
+	{
+	mathResolver = new MathResolver();
+
+	thinkCam = new FlxCamera();
+
+	FlxG.cameras.insert(thinkCam, FlxG.cameras.list.indexOf(PlayState.instance.camCutscene), false);
+
+	PlayState.instance.add(mathResolver);
+	
+	underlay = new FlxSprite(0, 0, Paths.image('mechanics/thinkpad/underlay'));
+	underlay.scale.set(0.67, 0.67);
+	underlay.updateHitbox();
+	PlayState.instance.add(underlay);
+	underlay.cameras = [thinkCam];
+	underlay.zIndex = 10;
+	
+	atlas = CharacterDataParser.fetchCharacter('baldi-mathAtlas');
+	atlas.cameras = [thinkCam];
+	PlayState.instance.add(atlas);
+	atlas.visible = false;
+	atlas.x = (FlxG.width / 2) - 305;
+	atlas.y = 450;
+	atlas.zIndex = 20;
+
+	atlas.animation.onFinish.add((anim) -> atlas.playAnimation('idle'));
+	
+	atlasCover = new AttachedSprite();
+	atlasCover.makeGraphic(1, 1, 0xFF000000, true, true);
+	atlasCover.scale.set(300, 150);
+	atlasCover.updateHitbox();
+	atlasCover.cameras = [thinkCam];
+	PlayState.instance.add(atlasCover);
+	atlasCover.x = (FlxG.width / 2) - 340;
+	atlasCover.zIndex = 30;
+	
+	thinkPad = new FlxSprite(0, 0, Paths.image('mechanics/thinkpad/thinkpad'));
+	thinkPad.scale.set(0.67, 0.67);
+	thinkPad.updateHitbox();
+	thinkPad.screenCenter();
+	thinkPad.cameras = [thinkCam];
+	PlayState.instance.add(thinkPad);
+	thinkPad.active = false;
+	thinkPad.zIndex = 40;
+	
+	underlay.x = thinkPad.x + (221 * 0.67);
+	underlay.y = thinkPad.y + (616 * 0.67);
+	
+	atlasCover.sprTracker = thinkPad;
+	atlasCover.yAdd = (838 * 0.67);
+	atlasCover.xAdd = (220 * 0.67);
+	
+	thinkPadText = new FlxText(thinkPad.x + (410 * 0.67), thinkPad.y + (345 * 0.67), 450 * 0.67, "", 24);
+	thinkPadText.font = Paths.font("comic.ttf");
+	thinkPadText.color = 0xFF000000;
+	PlayState.instance.add(thinkPadText);
+	thinkPadText.cameras = [thinkCam];
+	thinkPadText.zIndex = 50;
+
+	typedText = new FlxText(thinkPad.x + (547 * 0.67), thinkPad.y + (658 * 0.67), 0, "", 64);
+	typedText.font = Paths.font("comic.ttf");
+	typedText.color = 0xFF000000;
+	PlayState.instance.add(typedText);
+	typedText.cameras = [thinkCam];
+	typedText.zIndex = 60;
+
+	markers = [];
+	
+	for (i in 0...3)
+	{
+		var mark = new FlxSprite(0, 0, Paths.image('mechanics/thinkpad/Check'));
+		mark.scale.set(0.67, 0.67);
+		mark.updateHitbox();
+		markers.push(mark);
+		PlayState.instance.add(mark);
+		mark.zIndex = 70;
+		
+		mark.x = thinkPad.x + (244 * 0.67) + (((126 * 0.67) - mark.width) / 2);
+		mark.y = thinkPad.y + (322 * 0.67) + (((82 * 0.67) - mark.height) / 2);
+		mark.y += (100 * 0.67) * i;
+		mark.cameras = [thinkCam];
+		mark.visible = false;
+	}
+	
+	// precache
+	
+	Paths.image('mechanics/thinkpad/X');
+	Paths.sound('basics/correct');
+	Paths.sound('basics/wrong');
+
+	thinkCam.alpha = 0;
+	thinkCam.scroll.y = -FlxG.height;
+
+	spawnBfAtlas();
+	}
+	mathResolver.mathMisses = 0;
+	thinkPadText.text = '';
+	typedText.text = '';
+	for(i in 0...markers.length)
+	{
+	markers[i].loadGraphic(Paths.image('mechanics/thinkpad/Check'));
+	markers[i].visible = false;
+	}
+	atlas.visible = false;
+	bfAtlas.visible = false;
+	for (text in garbledTexts)
+	text.visible = false;
+	if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getNamedProp("bg5") != null) PlayState.instance.currentStage.getNamedProp("bg5").visible = true;
+	FlxTween.cancelTweensOf(thinkCam);
+	thinkCam.alpha = 0;
+	thinkCam.scroll.y = -FlxG.height;
+	atlas.animation.onFinish.add((anim) -> atlas.playAnimation('idle'));
+	if(!PlayState.instance.isBotPlayMode)
+	PlayState.instance.playerStrumline.isPlayer = true;
+}
+
+function onSongEvent(event)
+{
+	switch (event.eventData.eventKind)
+	{
+		case '':
+			switch (event.eventData.value.value1)
+			{
+				case 'goodOne':
+					var anim = mathResolver.mathMisses == 0 ? 'goodOne' : 'badOne';
+					
+					if (PlayState.instance.currentStage != null) PlayState.instance.currentStage.getDad().playAnimation(anim, true, true);
+
+					if(mathResolver.mathMisses == 0)
+					PlayStatePlaylist.playlistSongIds[PlayStatePlaylist.playlistSongIds.indexOf('lesson')] = 'lesson-good';
+
+				case 'swapBaldiPoses':
+					if (mathResolver.mathMisses != 0) PlayState.instance.currentStage.getDad().idleSuffix = '-upset';
+				case "makeAngry":
+					if (PlayState.instance.currentStage != null) PlayState.instance.currentStage.getDad().idleSuffix = '-mad';
+					atlas.playAnimation('failed', true);
+					atlas.animation.onFinish.removeAll();
+					atlas.visible = true;
+					bfAtlas.visible = false;
+				case 'fakeCheckMath':
+					mathResolver.input = -10;
+					mathResolver.resolveMath();
+					
+					thinkPadText.text = StringTools.replace(thinkPadText.text, '= ' + mathResolver.intendedValue, '= ');
+					
+					typedText.text = getBfAnswer();
+			}
+		case 'mathText': // sets the text so be shown in the thinkpad.
+			thinkPadText.text = event.eventData.value.value1;
+			thinkPadText.size = event.eventData.value.value2 == "" ? 24 : 36;
+			
+			for (text in garbledTexts)
+				text.visible = false;
+				
+		case 'mathAnims': // plays baldi math atlas anims
+			atlas.visible = true;
+			atlas.playAnimation(event.eventData.value.value1, true);
+			PlayState.instance?.vocals?.playerVolume = 1;
+			
+		case 'revealThinkpad':
+			PlayState.instance?.vocals?.playerVolume = 1;
+			
+			moveThinkpad(true);
+			
+		case 'exitThinkpad':
+			moveThinkpad(false);
+			
+			// its safe to say if there is a notebook var it should be gone
+	if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getNamedProp("bg5") != null) PlayState.instance.currentStage.getNamedProp("bg5").visible = false;
+			
+		case 'startMathEquation': // used to be math
+	mathResolver.start(Std.parseInt(event.eventData.value.value1.split(',')[0]), Std.parseInt(event.eventData.value.value1.split(',')[1]), event.eventData.value.value2 == 'true');
+			
+			typedText.text = '';
+			typedText.color = 0xFF000000;
+			
+		case 'mathCpuCheck': // if u have botplay lets just auto answer it
+			if (PlayState.instance.isBotPlayMode)
+			{
+				//
+				mathResolver.input = mathResolver.intendedValue;
+				mathResolver.resolveMath();
+			}
+			
+		case 'checkMathAnswer': // this is needed if u didnt answer
+		
+			mathResolver.resolveMath();
+			
+			// lets also reset it
+			typedText.text = '';
+			typedText.color = 0xFF000000;
+			
+		case 'bfAnim':
+			if (bfAtlas != null)
+			{
+				bfAtlas.visible = true;
+				bfAtlas.animation.play('aha');
+				atlas.visible = false;
+			}
+		case 'disableMathInput':
+			mathResolver.lockInputs = true;
+			
+		case 'garbledMathText':
+			thinkPadText.size = event.eventData.value.value2 == "" ? 24 : 36;
+			
+			if (garbledTexts.length == 0)
+			{
+				for (idx in 0...2)
+				{
+					// var copy = thinkPadText.clone(); //flxtext clone doesnt properly work
+					
+					var copy = new FlxText();
+					copy.size = thinkPadText.size;
+					copy.font = thinkPadText.font;
+					copy.cameras = thinkPadText.cameras;
+					copy.fieldWidth = thinkPadText.fieldWidth;
+					copy.x = thinkPadText.x;
+					copy.y = thinkPadText.y;
+					copy.color = thinkPadText.color;
+
+					PlayState.instance.add(copy);
+					copy.zIndex = 41;
+					garbledTexts.push(copy);
+				}
+			}
+			
+			var garbledFirst = Std.string(FlxG.random.int(-9000, 9000));
+			var garbledSecond = Std.string(FlxG.random.int(-9000, 9000));
+			
+			thinkPadText.text = StringTools.replace(StringTools.replace(event.eventData.value.value1, 'GARBLED1', garbledFirst), 'GARBLED2', garbledSecond);
+			
+			for (text in garbledTexts)
+			{
+				var garbledFirst = Std.string(FlxG.random.int(-9000, 9000));
+				var garbledSecond = Std.string(FlxG.random.int(-9000, 9000));
+				
+				text.visible = true;
+				
+				text.text = StringTools.replace(StringTools.replace(event.eventData.value.value1, 'GARBLED1', garbledFirst), 'GARBLED2', garbledSecond);
+				text.text = StringTools.replace(text.text, 'Solve Math Q3:', '');
+			}
+	}
+}
+
+function moveThinkpad(appear)
+{
+	var time = Conductor.instance.beatLengthMs / 1000;
+	var ease = FlxEase.quadOut;
+	
+	FlxTween.cancelTweensOf(thinkCam, ['scroll.y', 'alpha']);
+	if (appear)
+	{
+		atlas.revive();
+		thinkPad.revive();
+		atlasCover.revive();
+		
+		FlxTween.tween(thinkCam.scroll, {y: 0}, time * 2, {ease: ease});
+		FlxTween.tween(thinkCam, {alpha: 1}, time * 2, {ease: ease});
+	}
+	else
+	{
+		FlxTween.tween(thinkCam.scroll, {y: -FlxG.height}, time * 2, {ease: ease});
+		FlxTween.tween(thinkCam, {alpha: 0}, time * 2,
+			{
+				ease: ease,
+				onComplete: Void -> {
+					atlas.kill();
+					thinkPad.kill();
+					atlasCover.kill();
+					// unlock keys after because people keep pressing r while readjusting themself
+					mathResolver.disableKeys(false);
+				}
+			});
+	}
+}
+
+function spawnBfAtlas()
+{
+	bfAtlas = new FunkinSprite();
+	bfAtlas.loadTextureAtlas("mechanics/thinkpad/mathBf", "shared");
+	bfAtlas.anim.addBySymbol('aha', 'aha', 24, false);
+	bfAtlas.cameras = [thinkCam];
+	bfAtlas.scale.set(0.3, 0.3);
+	bfAtlas.updateHitbox();
+	bfAtlas.setPosition(330, 460);
+	PlayState.instance.add(bfAtlas);
+	bfAtlas.zIndex = 21;
+	bfAtlas.visible = false;
+	bfAtlas.x = (FlxG.width / 2) - 310;
+}
+
+var boxSize = 89 * 0.67;
+var point = new FlxPoint();
+
+function onUpdate(event)
+{
+if(PlayState.instance != null && !PlayState.instance.playerStrumline.isPlayer)
+{
+    // Process notes on the player's side.
+    for (note in PlayState.instance.playerStrumline.notes.members)
+    {
+      if (note == null || !note.alive) continue;
+      var r = GRhythmUtil.processWindow(note, false);
+      if (r.botplayHit)
+      {
+PlayState.instance.goodNoteHit(note, {timestamp: PreciseInputManager.getCurrentTimestamp()});
+      }
+    }
+}
+	//
+	
+	if (mathResolver != null && mathResolver.isInMath && !mathResolver.lockInputs)
+	{
+		if (TouchUtil.justPressed)
+		{
+			for (i in 0...11)
+			{
+				var x = thinkPad.x + (1112 * 0.67) + (boxSize * (i + 1)) % (3 * boxSize);
+				var y = thinkPad.y + (292 * 0.67) + (boxSize * Math.floor((10 - i) / 3));
+				
+				var mouseOver = over(x, y);
+				if (mouseOver)
+				{
+					var idx = Std.string(i);
+					if (i > 1)
+					{
+						idx = Std.string(i - 1);
+					}
+					else if (i == 1)
+					{
+						idx = '-';
+					}
+					mathResolver.input += idx;
+
+					mathResolver.onKeyPress(i);
+
+					if (mathResolver.input.length >= mathResolver.numLength) mathResolver.resolveMath();
+				}
+			}
+		}
+	}
+}
+
+function over(x:Float, y:Float)
+{
+	if(TouchUtil.touch != null)
+	{
+	TouchUtil.touch.getWorldPosition(thinkCam, point);
+	return point.x > x && point.y > y && point.x < (x + boxSize) && point.y < (y + boxSize);
+	}
+}
+
+function getBfAnswer():String {
+    var values = ['31718', '90621', '94150', '0', '12', '42', '37.569'];
+    return values[FlxG.random.int(0, values.length - 1)];
+}
+}

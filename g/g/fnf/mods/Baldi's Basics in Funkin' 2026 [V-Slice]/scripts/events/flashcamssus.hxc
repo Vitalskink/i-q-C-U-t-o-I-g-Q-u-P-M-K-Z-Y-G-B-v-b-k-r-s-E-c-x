@@ -1,0 +1,76 @@
+import funkin.play.PlayState;
+import funkin.play.event.ScriptedSongEvent;
+import funkin.Conductor;
+import flixel.FlxG;
+import flixel.util.FlxColor;
+import funkin.Preferences;
+
+class BaldsFlashCamSimple extends ScriptedSongEvent
+{
+    public var eventTitle:String = "Camera Flash (Simple)";
+
+    var DEFAULT_DURATION:Float = 1.0; // em steps
+    var DEFAULT_INTENSITY:Float = 1.0;
+    var DEFAULT_APPLYHUD:Bool = true;
+
+    function new()
+    {
+        super("flashcam_simple");
+    }
+
+    override function handleEvent(data):Void
+    {
+        if (PlayState.instance == null || PlayState.instance.currentStage == null) return;
+        if (PlayState.instance.isMinimalMode) return;
+        if (!Preferences.flashingLights) return;
+
+        var durationSteps:Float = data.getFloat("duration") ?? DEFAULT_DURATION;
+        var intensity:Float = data.getFloat("intensity") ?? DEFAULT_INTENSITY;
+        var applyHUD:Bool = data.getBool("applyToHud") ?? DEFAULT_APPLYHUD;
+
+        if (durationSteps <= 0) return;
+
+        // steps → segundos
+        var durationSeconds:Float =
+            (Conductor.instance.stepLengthMs * durationSteps / 1000) * intensity;
+
+        if (applyHUD)
+            PlayState.instance.camHUD?.flash(FlxColor.WHITE, durationSeconds);
+        else
+            FlxG.camera.flash(FlxColor.WHITE, durationSeconds);
+    }
+
+    override function getTitle()
+    {
+        return eventTitle;
+    }
+
+    override function getEventSchema()
+    {
+        return [
+            {
+                name: "duration",
+                title: "Duration",
+                defaultValue: 1.0,
+                step: 0.25,
+                min: 0.25,
+                type: "float",
+                units: "steps"
+            },
+            {
+                name: "intensity",
+                title: "Intensity",
+                defaultValue: 1.0,
+                step: 0.25,
+                min: 0.1,
+                type: "float"
+            },
+            {
+                name: "applyToHud",
+                title: "Apply to camHUD",
+                defaultValue: true,
+                type: "bool"
+            }
+        ];
+    }
+}

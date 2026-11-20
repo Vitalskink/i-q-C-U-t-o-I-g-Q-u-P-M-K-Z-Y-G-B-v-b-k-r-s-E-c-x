@@ -1,0 +1,231 @@
+import funkin.play.PlayState;
+import funkin.graphics.FunkinSprite;
+import funkin.play.CountdownStep;
+import funkin.FunkinMemory;
+import funkin.Conductor;
+import flixel.math.FlxRect;
+import flixel.math.FlxMath;
+import funkin.modding.module.Module;
+
+class BaldiHud extends Module
+{
+    var countdown:FunkinSprite;
+    var animFrameRate:Float;
+
+    var healthBarBG:FunkinSprite;
+    var healthBarGreen:FunkinSprite;
+    var healthBar:FunkinSprite;
+    var clock:FunkinSprite;
+    var clock_hand:FunkinSprite;
+
+    var game:PlayState;
+
+    var added:Bool = false;
+    var clockAllowed:Bool = false;
+    public function new()
+    {
+        super("BaldiHud", 1000, {state:PlayState});
+    }
+
+    public function onSongLoaded(event) 
+    {
+        super.onSongLoaded(event);
+        game = PlayState.instance;
+        if(game == null) return;
+        if(!isSongValid(game.currentSong?.id) || healthBarGreen == null) return; 
+        var baldiHud:Array<String> = ["clock-real", "clock","healthBar", "healthBar-real", "healthBarBar", "healthBar-realBar"];
+        for(spr in baldiHud)
+        {
+           FunkinMemory.permanentCacheTexture(Paths.image('ui/$spr'));
+        }
+    }
+
+    public function onCountdownStart(event)
+    {
+        super.onCountdownStart(event);
+        clockAllowed = false;
+        if(added || !isSongValid(game.currentSong.id)) return;
+        added = true;
+        
+        var barY = game.healthBarBG.y;
+        var hbzIndex = game.healthBarBG.zIndex;
+
+        game.healthBar.visible = false;
+        game.healthBarBG.visible = false;
+        game.scoreText.visible = false;
+        game.scoreText.active = false;
+        
+        countdown = FunkinSprite.createSparrow(0, 0, "ui/countdown");
+        animFrameRate = (8 * (1 / (((60 / Conductor.instance.bpm) * 1000) / 1000)));
+        countdown.animation.addByPrefix("THREE", "three", animFrameRate, false);
+        countdown.animation.addByPrefix("TWO", "two", animFrameRate, false);
+        countdown.animation.addByPrefix("ONE", "one", animFrameRate, false);
+        countdown.animation.addByPrefix("GO", "go", animFrameRate, false);
+        countdown.cameras = [game.camHUD];
+		countdown.scrollFactor.set();
+        countdown.screenCenter();
+		countdown.updateHitbox();
+        game.add(countdown);
+        countdown.visible = false;
+
+        healthBarBG = new FunkinSprite(0, 0, Paths.image("ui/healthBarBar"));
+        healthBarBG.screenCenter(0x01);
+        healthBarBG.y = barY;
+        healthBarBG.zIndex = hbzIndex;
+        healthBarBG.cameras = [game.camHUD];
+        healthBarBG.scrollFactor.set();
+        healthBarBG.color = 0xFFFF0000;
+        game.add(healthBarBG);
+
+        healthBarGreen = new FunkinSprite(0, 0, Paths.image("ui/healthBarBar"));
+        healthBarGreen.screenCenter(0x01);
+        healthBarGreen.y = barY;
+        healthBarGreen.zIndex = hbzIndex + 1;
+        healthBarGreen.cameras = [game.camHUD];
+        healthBarGreen.scrollFactor.set();
+        healthBarGreen.color = 0xFF66FF33;
+        game.add(healthBarGreen);
+
+        healthBar = new FunkinSprite(0, 0, Paths.image("ui/healthBar"));
+        healthBar.screenCenter(0x01);
+        healthBar.y = barY;
+        healthBar.zIndex = hbzIndex + 2;
+        healthBar.cameras = [game.camHUD];
+        healthBar.scrollFactor.set();
+        game.add(healthBar);
+
+        clock = new FunkinSprite(0, 0, Paths.image("ui/clock"));
+        clock.scale.set(0.45 , 0.45);
+		clock.updateHitbox();
+		clock.screenCenter(0x01);
+        clock.x = clock.x - 30;
+        clock.y = 55;
+        if(Preferences.downscroll)
+        {
+          clock.y = FlxG.height - clock.height - clock.y;
+        } 
+        #if mobile clock.setPosition((FlxG.width - clock.width) - 50, (FlxG.height - clock.height) - 100); #end
+        clock.zIndex = hbzIndex + 3;
+        clock.cameras = [game.camHUD];
+        clock.scrollFactor.set();
+        game.add(clock);
+
+        clock_hand = new FunkinSprite(clock.x + (clock.width - 5) / 2 - 0.5, clock.y + 15 + -1).makeGraphic(5, 30, 0xFF000000);
+		clock_hand.origin.set(2.5, 30);
+        clock_hand.zIndex = hbzIndex + 4;
+        clock_hand.cameras = [game.camHUD];
+        clock_hand.scrollFactor.set();
+        game.add(clock_hand);
+
+        game.refresh();
+
+    }
+
+    public function onCountdownStep(event)
+    {
+        super.onCountdownStep(event);
+        if(countdown == null) return;
+        trace(animFrameRate);
+        switch(event.step)
+        {
+            case CountdownStep.THREE:
+            countdown.visible = true;
+            playCountdown("THREE");
+            case CountdownStep.TWO:
+            countdown.visible = true;
+            playCountdown("TWO");
+            case CountdownStep.ONE: 
+            countdown.visible = true;
+            playCountdown("ONE");
+            case CountdownStep.GO:
+            countdown.visible = true;
+             playCountdown("GO");
+        }
+    }
+
+
+    function playCountdown(anim:String)
+    {
+        countdown.animation.finishCallback = null;
+        
+        countdown.animation.play(anim, true, false);
+        
+        countdown.animation.finishCallback = function(name:String) {
+                countdown.visible = false;
+                countdown.animation.finishCallback = null;
+        };
+    }
+
+    public function onSongStart(event)
+    {
+        super.onSongStart(event);
+        clockAllowed = true;
+    }
+
+    public function onStepHit(event)
+    {
+        super.onStepHit(event);
+        if(game == null || clock_hand == null) return;
+        if(clockAllowed) clock_hand?.angle = Math.round(360 * (FlxG.sound.music?.time / FlxG.sound.music?.length));
+    }
+
+
+    public function onUpdate(event)
+    {
+        super.onUpdate(event);
+
+        if(game == null) return;
+
+        if(!isSongValid(game?.currentSong?.id) || healthBarGreen == null) return; 
+        
+        if(game.healthLerp >= 1.8) game.healthLerp = 1.8;
+        if(game.healthLerp <= 0.25) game.healthLerp = 0.25;
+
+        var clipWidth = (game.health / 2) * healthBarGreen.frameWidth;
+        var offset = healthBarGreen.frameWidth - clipWidth;
+               
+        healthBarGreen.clipRect = new FlxRect(offset, 0, clipWidth, healthBarGreen.frameHeight);
+    }
+
+    public function onStateChangeBegin(event)
+    {
+      super.onStateChangeBegin(event);
+        added = false;
+    }
+
+    function isSongValid(songId:String):Bool
+    {
+        var validSongs:Array<String> = ["basics", "expulsion", "lesson", "lesson-good","firewall"];
+        return validSongs.contains(songId);
+    }
+
+    public function onSongEvent(event)
+    {
+        super.onSongEvent(event);
+        if(event.eventData.eventKind == 'baldiRealHud')
+        {
+            swapHud(event.eventData.getBool("real"));
+        }
+    }  
+
+    function swapHud(real:Bool)
+    {
+        if(real) {
+            
+        clock.loadGraphic(Paths.image('ui/clock-real'));
+        healthBar.loadGraphic(Paths.image('ui/healthBar-real'));
+        healthBarBG.loadGraphic(Paths.image('ui/healthBar-realBar'));
+        healthBarGreen.loadGraphic(Paths.image('ui/healthBar-realBar'));
+
+        } else {
+
+        clock.loadGraphic(Paths.image('ui/clock'));
+		healthBar.loadGraphic(Paths.image('ui/healthBar'));
+        healthBarBG.loadGraphic(Paths.image('ui/healthBarBar'));
+		healthBarGreen.loadGraphic(Paths.image('ui/healthBarBar'));
+
+        }
+        
+    }
+
+}

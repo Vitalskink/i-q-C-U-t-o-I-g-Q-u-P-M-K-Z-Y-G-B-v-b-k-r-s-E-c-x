@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="pauseButton.png">
+	<!-- Created using the Spritesheet and XML generator -->
+	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
+	<SubTexture name="pause0000" x="0" y="0" width="114" height="117" frameX="-1" frameY="1" frameWidth="116" frameHeight="115"/>
+</TextureAtlas>

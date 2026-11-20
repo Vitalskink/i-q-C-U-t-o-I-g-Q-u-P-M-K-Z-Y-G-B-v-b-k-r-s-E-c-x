@@ -1,0 +1,49 @@
+import flixel.FlxG;
+import funkin.play.stage.Stage;
+
+class Classroomfinalstage extends Stage
+{
+    function new()
+    {
+        super("classroom");
+    }
+
+    override function buildStage()
+    {
+        super.buildStage();
+
+        var bg2 = getNamedProp("bg2");
+        var bg3 = getNamedProp("bg3");
+        var bg5 = getNamedProp("bg5");
+
+        if (bg2 != null)
+        {
+            if (FlxG.random.bool(50))
+                bg2.loadTexture("stages/classroom/chairs2");
+            else
+                bg2.loadTexture("stages/classroom/chairs");
+        }
+
+        if (bg3 != null)
+        {
+            var n = FlxG.random.int(0, 46);
+            if (n == 0)
+                bg3.loadTexture("stages/classroom/chalkboards/default");
+            else
+                bg3.loadTexture("stages/classroom/chalkboards/" + (n - 1));
+        }
+
+        if (bg5 != null)
+        {
+            if (FlxG.random.bool(50))
+                bg5.loadTexture("stages/classroom/red_notebook");
+            else
+                bg5.loadTexture("stages/classroom/blue_notebook");
+        }
+    }
+
+    override function onSongRetry(event)
+    {
+        super.onSongRetry(event);
+    }
+}

@@ -1,0 +1,157 @@
+import funkin.play.PlayState;
+import funkin.Conductor;
+import flixel.FlxG;
+
+import funkin.play.event.ScriptedSongEvent;
+import funkin.util.ReflectUtil;
+
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.util.Constants;
+
+class MoveStrumlinesEvent extends ScriptedSongEvent {
+
+  function new() {
+    super("moveStrumlinesEvent");
+  }
+
+  public var eventTitle:String = "Move Strumlines";
+
+  public var DEFAULT_DIRECTION:String = "center";
+  public var DEFAULT_DURATION:Float = 4.0;
+  public var DEFAULT_EASE:String = "linear";
+  public var DEFAULT_OFFSETX:Float = 0.0;
+
+  public var DEFAULT_PLAYER_ALPHA:Float = 1.0;
+  public var DEFAULT_OPPONENT_ALPHA:Float = 1.0;
+
+  var playerTween:FlxTween = null;
+  var opponentTween:FlxTween = null;
+
+  override function handleEvent(data) {
+    if (PlayState.instance == null) return;
+    if (PlayState.instance.currentStage == null) return;
+    if (PlayState.instance.isMinimalMode) return;
+    if (FlxG.onMobile) return;
+
+    var direction:String = data.getString("direction") != null ? data.getString("direction") : DEFAULT_DIRECTION;
+    var duration:Float = data.getFloat("duration") != null ? data.getFloat("duration") : DEFAULT_DURATION;
+    var ease:String = data.getString("ease") != null ? data.getString("ease") : DEFAULT_EASE;
+    var offSetX:Float = data.getFloat("offSetX") != null ? data.getFloat("offSetX") : DEFAULT_OFFSETX;
+
+    var playerAlpha:Float = data.getFloat("playerAlpha") != null ? data.getFloat("playerAlpha") : DEFAULT_PLAYER_ALPHA;
+    var opponentAlpha:Float = data.getFloat("opponentAlpha") != null ? data.getFloat("opponentAlpha") : DEFAULT_OPPONENT_ALPHA;
+
+    var durSeconds:Float = Conductor.instance.stepLengthMs * duration / 1000;
+    var easeFunction:Null<Float->Float> = ReflectUtil.getAnonymousField(FlxEase, ease);
+
+    cancelTweens();
+
+    var playerTargetX:Float;
+    var opponentTargetX:Float;
+
+    switch (direction) {
+      case "left":
+        playerTargetX = Constants.STRUMLINE_X_OFFSET + offSetX;
+        opponentTargetX = FlxG.width / 2 + Constants.STRUMLINE_X_OFFSET + offSetX;
+
+      case "right":
+        playerTargetX = FlxG.width / 2 + Constants.STRUMLINE_X_OFFSET + offSetX;
+        opponentTargetX = Constants.STRUMLINE_X_OFFSET + offSetX;
+
+      case "center":
+        playerTargetX = FlxG.width / 2 - PlayState.instance.playerStrumline.width / 2 + offSetX;
+        opponentTargetX = playerTargetX;
+
+      default:
+        playerTargetX = FlxG.width / 2 - PlayState.instance.playerStrumline.width / 2 + offSetX;
+        opponentTargetX = Constants.STRUMLINE_X_OFFSET;
+    }
+
+    if (ease == "INSTANT") {
+      PlayState.instance.playerStrumline.x = playerTargetX;
+      PlayState.instance.opponentStrumline.x = opponentTargetX;
+
+      PlayState.instance.playerStrumline.alpha = playerAlpha;
+      PlayState.instance.opponentStrumline.alpha = opponentAlpha;
+    } else {
+      playerTween = FlxTween.tween(
+        PlayState.instance.playerStrumline,
+        {x: playerTargetX, alpha: playerAlpha},
+        durSeconds / PlayState.instance.playbackRate,
+        {ease: easeFunction}
+      );
+
+      opponentTween = FlxTween.tween(
+        PlayState.instance.opponentStrumline,
+        {x: opponentTargetX, alpha: opponentAlpha},
+        durSeconds / PlayState.instance.playbackRate,
+        {ease: easeFunction}
+      );
+    }
+  }
+
+  function cancelTweens() {
+    if (playerTween != null) playerTween.cancel();
+    if (opponentTween != null) opponentTween.cancel();
+  }
+
+  override function getTitle() {
+    return eventTitle;
+  }
+
+  override function getEventSchema() {
+    return [
+      {
+        name: "direction",
+        title: "Direction",
+        type: "enum",
+        defaultValue: "center",
+        keys: [
+          "Left" => "left",
+          "Center" => "center",
+          "Right" => "right"
+        ]
+      },
+      {
+        name: "playerAlpha",
+        title: "Player Alpha",
+        type: "float",
+        defaultValue: 1.0,
+        min: 0,
+        max: 1,
+        step: 0.1
+      },
+      {
+        name: "opponentAlpha",
+        title: "Opponent Alpha",
+        type: "float",
+        defaultValue: 1.0,
+        min: 0,
+        max: 1,
+        step: 0.1
+      },
+      {
+        name: "duration",
+        title: "Duration",
+        type: "float",
+        defaultValue: 4.0,
+        step: 0.5,
+        min: 0
+      },
+      {
+        name: "ease",
+        title: "Ease",
+        type: "string",
+        defaultValue: "linear"
+      },
+      {
+        name: "offSetX",
+        title: "Offset X",
+        type: "float",
+        defaultValue: 0.0,
+        step: 0.1
+      }
+    ];
+  }
+}

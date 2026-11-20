@@ -1,0 +1,27 @@
+{
+    "version": "1.0.0",
+    "name": "Gf 3d",
+    "assetPath": "characters/gf/threed",
+    "singTime": 4,
+    "isPixel": true,
+    "scale": 1,
+    "healthIcon": {
+        "id": "face",
+        "isPixel": false,
+        "flipX": false,
+        "scale": 1
+    },
+    "animations": [
+        {
+            "name": "idle",
+            "prefix": "SUPERGF SUPER",
+            "offsets": [
+                -477,
+                -307
+            ],
+            "frameRate": 4,
+            "frameIndices": []
+        }
+    ],
+    "flipX": false
+}

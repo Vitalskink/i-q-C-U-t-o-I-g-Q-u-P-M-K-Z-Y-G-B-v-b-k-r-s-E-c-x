@@ -1,0 +1,219 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.character.CharacterDataParser;
+import funkin.modding.events.CountdownScriptEvent;
+import funkin.modding.events.HitNoteScriptEvent;
+import funkin.util.GRhythmUtil;
+import funkin.Highscore;
+import flixel.FlxG;
+import funkin.Conductor;
+
+class ExpulsionNullScript extends Module
+{
+    var mom = null;
+    var appeared:Bool = false;
+    var appearStep:Int = 1464;
+    var singDuration:Float = 0.15;
+    var followCenter:Bool = true;
+
+    public function new()
+    {
+        super("expulsion");
+    }
+
+    override function onCountdownStart(event:CountdownScriptEvent):Void
+    {
+        super.onCountdownStart(event);
+
+        if (PlayState.instance == null) return;
+        if (PlayState.instance.currentSong == null) return;
+        if (PlayState.instance.currentSong.id != "expulsion") return;
+        if (PlayState.instance.currentStage == null) return;
+
+        if (PlayState.instance.currentStage.getCharacter("mom") != null)
+            return;
+
+        mom = CharacterDataParser.fetchCharacter("null-expul");
+        if (mom == null) return;
+
+        PlayState.instance.currentStage.add(mom);
+
+        mom.cameras = [PlayState.instance.camHUD];
+        mom.scrollFactor.set(0, 0);
+        mom.zIndex = 999999;
+
+        centerMom();
+
+        mom.alpha = 0;
+        mom.visible = true;
+        PlayState.instance.currentStage.refresh();
+        PlayState.instance.currentStage.characters.set("mom", mom);
+    }
+
+    function centerMom():Void
+    {
+        if (mom == null) return;
+
+        mom.x = (FlxG.width - mom.width) / 2;
+        mom.y = (FlxG.height - mom.height) / 2;
+    }
+
+    override function onStepHit(event):Void
+    {
+        super.onStepHit(event);
+
+        if (PlayState.instance == null) return;
+        if (PlayState.instance.currentSong == null) return;
+        if (PlayState.instance.currentSong.id != "expulsion") return;
+
+        if (PlayState.instance.currentStage != null)
+            mom = PlayState.instance.currentStage.characters.get("mom");
+
+        if (mom == null) return;
+
+        switch (event.step)
+        {
+            case 927:
+                mom.alpha = 0;
+
+            case 1464:
+                appeared = true;
+                followCenter = false;
+                mom.alpha = 1;
+                mom.x = 50;
+                mom.y = -100;
+                mom.animation.play("Hey", true);
+                mom.holdTimer = 999;
+
+            case 1488:
+                followCenter = true;
+                centerMom();
+
+            case 2016:
+                mom.alpha = 0;
+                appeared = false;
+
+            case 2048:
+                appeared = true;
+                followCenter = true;
+                mom.alpha = 1;
+
+            case 2944:
+                mom.alpha = 0;
+                appeared = false;
+
+        }
+    }
+
+    override function onUpdate(event):Void
+    {
+        super.onUpdate(event);
+
+        if (PlayState.instance == null) return;
+        if (PlayState.instance.currentSong == null) return;
+        if (PlayState.instance.currentSong.id != "expulsion") return;
+
+        if (PlayState.instance.currentStage != null)
+            mom = PlayState.instance.currentStage.characters.get("mom");
+
+        if (mom == null) return;
+
+        if (followCenter)
+            centerMom();
+
+        var curStep:Int = 0;
+        if (Conductor.instance != null)
+        {
+            curStep = Std.int(Math.floor(Conductor.instance.songPosition / Conductor.instance.stepCrochet));
+        }
+
+        if (!appeared && curStep < appearStep)
+        {
+            mom.alpha = 0;
+        }
+
+        if (appeared && curStep >= appearStep)
+        {
+            mom.alpha = 1;
+        }
+
+        if (appeared)
+        {
+            processNotes(event.elapsed);
+        }
+    }
+
+    function onNoteHit(event:HitNoteScriptEvent):Void
+    {
+        if (PlayState.instance == null) return;
+
+        if (event.note.noteData.kind == "NULL")
+        {
+            event.cancelEvent();
+            event.stopPropagation();
+        }
+    }
+
+    function onNoteIncoming(event):Void
+    {
+        if (PlayState.instance == null) return;
+
+        if (event.note.noteData.kind == "NULL")
+        {
+            if (event.note.noteData.getMustHitNote())
+                Highscore.tallies.totalNotes--;
+
+            event.note.hasBeenHit = true;
+
+            event.note.alpha = 0;
+            event.note.visible = true;
+
+            if (event.note.holdNoteSprite != null)
+            {
+                event.note.holdNoteSprite.alpha = 0;
+                event.note.holdNoteSprite.visible = true;
+            }
+        }
+    }
+
+    function processNotes(elapsed:Float):Void
+    {
+        if (PlayState.instance.playerStrumline == null) return;
+        if (PlayState.instance.opponentStrumline == null) return;
+
+        processStrumline(PlayState.instance.playerStrumline.notes.members);
+        processStrumline(PlayState.instance.opponentStrumline.notes.members);
+    }
+
+    function processStrumline(notes:Array<Dynamic>):Void
+    {
+        if (notes == null) return;
+
+        for (note in notes)
+        {
+            if (note == null) continue;
+            if (note.noteData == null) continue;
+
+            if (note.noteData.kind == "NULL")
+            {
+                if (note.alive) note.hasBeenHit = false;
+
+                var r = GRhythmUtil.processWindow(note, false);
+                note.hasBeenHit = true;
+
+                if (r.botplayHit)
+                {
+                    if (mom != null)
+                    {
+                        mom.playSingAnimation(note.noteData.getDirection(), false);
+                        mom.holdTimer = singDuration;
+                    }
+
+                    note.visible = false;
+                    note.alpha = 0;
+                    note.kill();
+                }
+            }
+        }
+    }
+}

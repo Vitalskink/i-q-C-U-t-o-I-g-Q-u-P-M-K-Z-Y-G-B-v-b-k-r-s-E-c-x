@@ -1,0 +1,42 @@
+{
+    "props": [],
+    "cameraZoom": 0.3,
+    "version": "1.0.0",
+    "characters": {
+        "bf": {
+            "zIndex": 300,
+            "position": [
+                2200,
+                1700
+            ],
+            "cameraOffsets": [
+                -250,
+                -300
+            ]
+        },
+        "dad": {
+            "zIndex": 200,
+            "position": [
+                750,
+                1580
+            ],
+            "cameraOffsets": [
+                450,
+                -100
+            ]
+        },
+        "gf": {
+	    "alpha": 0,
+            "zIndex": 100,
+            "cameraOffsets": [
+                0,
+                50
+            ],
+            "position": [
+                400,
+                130
+            ]
+        }
+    },
+    "name": "Firewall"
+}

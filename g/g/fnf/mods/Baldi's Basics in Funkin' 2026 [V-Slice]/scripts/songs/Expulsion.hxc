@@ -1,0 +1,527 @@
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.PlayStatePlaylist;
+import funkin.play.notes.StrumlineNote;
+import funkin.modding.events.SongTimeScriptEvent;
+import funkin.modding.events.ScriptEvent;
+import funkin.modding.events.CountdownScriptEvent;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Paths;
+import funkin.Conductor;
+import funkin.play.cutscene.VideoCutscene;
+import funkin.play.cutscene.CutsceneType;
+import haxe.ds.ObjectMap;
+
+class ExpulsionCredits extends Song
+{
+    var creditsImage:FlxSprite;
+    var titleText:FlxText;
+    var byText:FlxText;
+
+    var staticOverlay:FlxSprite;
+    var glitchOverlay:FlxSprite;
+    var overlayY:FlxSprite;
+    var overlayX:FlxSprite;
+
+    var defaultYPositions:ObjectMap<Dynamic, Float> = new ObjectMap();
+    var positionsInitialized:Bool = false;
+    var waveActive:Bool = false;
+    var hasPlayedCutscene:Bool;
+    var hasPlayedENDCutscene:Bool;
+
+    public function new()
+    {
+        super("expulsion");
+        hasPlayedCutscene = false;
+        hasPlayedENDCutscene = false;
+    }
+
+    override function onCreate()
+    {
+        super.onCreate();
+
+        hasPlayedCutscene = false;
+        hasPlayedENDCutscene = false;
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        creditsImage = new FlxSprite();
+        creditsImage.loadGraphic(Paths.image("ui/credits"));
+        creditsImage.setGraphicSize(Std.int(creditsImage.width * 0.85));
+        creditsImage.updateHitbox();
+        creditsImage.cameras = [game.camHUD];
+        creditsImage.x = 40;
+        creditsImage.y = game.camHUD.height + 200;
+        creditsImage.zIndex = 9999;
+        game.add(creditsImage);
+
+        titleText = new FlxText();
+        titleText.text = "Expulsion";
+        titleText.setFormat(Paths.font("comic.ttf"), 40, 0xFF00FF00, "left");
+        titleText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3);
+        titleText.cameras = [game.camHUD];
+        titleText.zIndex = 10000;
+        game.add(titleText);
+
+        byText = new FlxText();
+        byText.text = "By greggreg, xyy, Weednose, & headdzo";
+        byText.setFormat(Paths.font("comic.ttf"), 34, 0xFFFFFFFF, "left");
+        byText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3);
+        byText.cameras = [game.camHUD];
+        byText.zIndex = 10000;
+        game.add(byText);
+
+        staticOverlay = new FlxSprite(0, 0);
+        staticOverlay.frames = Paths.getSparrowAtlas("stages/classroom/null/static");
+        staticOverlay.animation.addByPrefix("static", "null_bg_bro", 5, true);
+        staticOverlay.animation.play("static", true);
+        staticOverlay.cameras = [game.camHUD];
+        staticOverlay.scrollFactor.set(0, 0);
+        staticOverlay.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+        staticOverlay.updateHitbox();
+        staticOverlay.x = 0;
+        staticOverlay.y = 0;
+        staticOverlay.alpha = 0;
+        staticOverlay.visible = true;
+        staticOverlay.zIndex = -1000;
+        game.add(staticOverlay);
+
+        glitchOverlay = new FlxSprite(0, 0);
+        glitchOverlay.frames = Paths.getSparrowAtlas("stages/classroom/null/glitch2");
+        glitchOverlay.animation.addByPrefix("glitch", "i", 8, true);
+        glitchOverlay.animation.play("glitch", true);
+        glitchOverlay.cameras = [game.camHUD];
+        glitchOverlay.scrollFactor.set(0, 0);
+        glitchOverlay.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+        glitchOverlay.updateHitbox();
+        glitchOverlay.x = 0;
+        glitchOverlay.y = 0;
+        glitchOverlay.alpha = 0;
+        glitchOverlay.visible = true;
+        glitchOverlay.zIndex = -999;
+        game.add(glitchOverlay);
+
+        overlayY = new FlxSprite(0, 0);
+        overlayY.loadGraphic(Paths.image("stages/classroom/null/white"));
+        overlayY.cameras = [game.camHUD];
+        overlayY.scrollFactor.set(0, 0);
+        overlayY.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+        overlayY.updateHitbox();
+        overlayY.x = 0;
+        overlayY.y = 0;
+        overlayY.alpha = 0;
+        overlayY.visible = true;
+        overlayY.zIndex = -998;
+        game.add(overlayY);
+
+        overlayX = new FlxSprite(0, 0);
+        overlayX.frames = Paths.getSparrowAtlas("stages/classroom/null/crack2");
+        overlayX.animation.addByPrefix("crack", "crack", 2, true);
+        overlayX.animation.play("crack", true);
+        overlayX.cameras = [game.camHUD];
+        overlayX.scrollFactor.set(0, 0);
+        overlayX.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+        overlayX.updateHitbox();
+        overlayX.x = 0;
+        overlayX.y = 0;
+        overlayX.alpha = 0;
+        overlayX.visible = true;
+        overlayX.zIndex = -997;
+        game.add(overlayX);
+
+        hideAllNotes();
+    }
+
+    override function onSongStart()
+    {
+        super.onSongStart();
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        var targetY = game.camHUD.height - creditsImage.height;
+
+        FlxTween.tween(creditsImage, { y: targetY }, 0.7, { ease: FlxEase.quadOut });
+
+        FlxTween.tween(creditsImage,
+            { y: game.camHUD.height + 200 },
+            0.7,
+            { startDelay: 4.0, ease: FlxEase.quadIn }
+        );
+    }
+
+    override function onBeatHit(event:SongTimeScriptEvent):Void
+    {
+        super.onBeatHit(event);
+
+        switch (event.beat)
+        {
+            case 0:
+                revealNoteSpin(0, 360, 0.55);
+            case 1:
+                revealNoteSpin(4, -360, 0.55);
+            case 2:
+                revealNoteSpin(1, 360, 0.55);
+            case 3:
+                revealNoteSpin(5, -360, 0.55);
+            case 4:
+                revealNoteSpin(2, 360, 0.55);
+            case 5:
+                revealNoteSpin(6, -360, 0.55);
+            case 6:
+                revealNoteSpin(3, 360, 0.55);
+            case 7:
+                revealNoteSpin(7, -360, 0.55);
+        }
+    }
+
+    override function onStepHit(event:SongTimeScriptEvent):Void
+    {
+        super.onStepHit(event);
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        switch (event.step)
+        {
+            case 1464:
+                if (overlayX != null)
+                {
+                    overlayX.alpha = 1;
+                    overlayX.animation.play("crack", true);
+                }
+
+                if (overlayY != null)
+                {
+                    overlayY.alpha = 0.4;
+                }
+
+            case 1488:
+                if (staticOverlay != null)
+                {
+                    staticOverlay.alpha = 1;
+                    staticOverlay.animation.play("static", true);
+                }
+
+                if (glitchOverlay != null)
+                {
+                    glitchOverlay.alpha = 1;
+                    glitchOverlay.animation.play("glitch", true);
+                }
+
+                waveActive = true;
+
+                var allStrums = game.opponentStrumline.strumlineNotes.members.concat(game.playerStrumline.strumlineNotes.members);
+                for (strum in allStrums)
+                {
+                    if (strum != null)
+                    {
+                        if (!defaultYPositions.exists(strum))
+                            defaultYPositions.set(strum, strum.y);
+                    }
+                }
+
+            case 2016:
+                if (staticOverlay != null)
+                {
+                    staticOverlay.alpha = 0;
+                    staticOverlay.animation.play("static", true);
+                }
+
+                if (glitchOverlay != null)
+                {
+                    glitchOverlay.alpha = 0;
+                    glitchOverlay.animation.play("glitch", true);
+                }
+
+                if (overlayY != null)
+                {
+                    overlayY.alpha = 0;
+                }
+
+            case 2048:
+                if (staticOverlay != null)
+                {
+                    staticOverlay.alpha = 1;
+                    staticOverlay.animation.play("static", true);
+                }
+
+                if (glitchOverlay != null)
+                {
+                    glitchOverlay.alpha = 1;
+                    glitchOverlay.animation.play("glitch", true);
+                }
+
+                if (overlayY != null)
+                {
+                    overlayY.alpha = 0.4;
+                }
+
+            case 2944:
+                waveActive = false;
+
+                if (staticOverlay != null)
+                {
+                    staticOverlay.alpha = 0;
+                    staticOverlay.animation.play("static", true);
+                }
+
+                if (glitchOverlay != null)
+                {
+                    glitchOverlay.alpha = 0;
+                    glitchOverlay.animation.play("glitch", true);
+                }
+
+                if (overlayY != null)
+                {
+                    overlayY.alpha = 0;
+                }
+
+                fadeOutArrow(0, 1);
+                fadeOutArrow(7, 1);
+
+            case 2976:
+                fadeOutArrow(1, 1);
+                fadeOutArrow(6, 1);
+
+            case 3010:
+                fadeOutArrow(2, 1);
+                fadeOutArrow(5, 1);
+
+            case 3047:
+                fadeOutArrow(3, 1);
+                fadeOutArrow(4, 1);
+        }
+    }
+
+    override function onUpdate(elapsed:Float)
+    {
+        super.onUpdate(elapsed);
+
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        if (!positionsInitialized)
+        {
+            if (game.opponentStrumline != null)
+            {
+                for (strum in game.opponentStrumline.strumlineNotes.members)
+                {
+                    if (strum != null)
+                        defaultYPositions.set(strum, strum.y);
+                }
+            }
+
+            if (game.playerStrumline != null)
+            {
+                for (strum in game.playerStrumline.strumlineNotes.members)
+                {
+                    if (strum != null)
+                        defaultYPositions.set(strum, strum.y);
+                }
+            }
+
+            positionsInitialized = true;
+        }
+
+        if (waveActive)
+        {
+            var time:Float = (Conductor.instance.songPosition / 900) * (Conductor.instance.bpm / 50);
+
+            if (game.opponentStrumline != null)
+            {
+                for (i in 0...game.opponentStrumline.strumlineNotes.members.length)
+                {
+                    var strum = game.opponentStrumline.strumlineNotes.members[i];
+                    if (strum != null && defaultYPositions.exists(strum))
+                    {
+                        var waveOffset:Float = 26 * Math.sin(((time * 0.7) + (i) * 0.25) * Math.PI);
+                        strum.y = defaultYPositions.get(strum) + waveOffset;
+                    }
+                }
+            }
+
+            if (game.playerStrumline != null)
+            {
+                for (i in 0...game.playerStrumline.strumlineNotes.members.length)
+                {
+                    var strum = game.playerStrumline.strumlineNotes.members[i];
+                    if (strum != null && defaultYPositions.exists(strum))
+                    {
+                        var waveOffset:Float = 40 * Math.sin(((time * 0.1) + (i + 4) * 0.25) * Math.PI);
+                        strum.y = defaultYPositions.get(strum) + waveOffset;
+                    }
+                }
+            }
+        }
+
+        if (creditsImage != null)
+        {
+            titleText.x = creditsImage.x + 70 + 250;
+            titleText.y = creditsImage.y + creditsImage.height - 120 - 180;
+
+            byText.x = creditsImage.x + 70 + 250;
+            byText.y = creditsImage.y + creditsImage.height - 60 - 180;
+        }
+
+        if (staticOverlay != null)
+        {
+            staticOverlay.cameras = [game.camHUD];
+            staticOverlay.scrollFactor.set(0, 0);
+            staticOverlay.x = 0;
+            staticOverlay.y = 0;
+            staticOverlay.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+            staticOverlay.updateHitbox();
+        }
+
+        if (glitchOverlay != null)
+        {
+            glitchOverlay.cameras = [game.camHUD];
+            glitchOverlay.scrollFactor.set(0, 0);
+            glitchOverlay.x = 0;
+            glitchOverlay.y = 0;
+            glitchOverlay.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+            glitchOverlay.updateHitbox();
+        }
+
+        if (overlayY != null)
+        {
+            overlayY.cameras = [game.camHUD];
+            overlayY.scrollFactor.set(0, 0);
+            overlayY.x = 0;
+            overlayY.y = 0;
+            overlayY.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+            overlayY.updateHitbox();
+        }
+
+        if (overlayX != null)
+        {
+            overlayX.cameras = [game.camHUD];
+            overlayX.scrollFactor.set(0, 0);
+            overlayX.x = 0;
+            overlayX.y = 0;
+            overlayX.setGraphicSize(Std.int(game.camHUD.width), Std.int(game.camHUD.height));
+            overlayX.updateHitbox();
+        }
+    }
+
+    public override function onSongEnd(event:CountdownScriptEvent):Void
+    {
+        super.onSongEnd(event);
+
+        if (!PlayStatePlaylist.isStoryMode)
+            hasPlayedENDCutscene = true;
+
+        if (!hasPlayedENDCutscene)
+        {
+            hasPlayedENDCutscene = true;
+            event.cancel();
+            startENDVideo();
+        }
+        else
+        {
+            hasPlayedENDCutscene = false;
+        }
+    }
+
+    function startENDVideo()
+    {
+        VideoCutscene.play(Paths.videos('post-expulsion'), CutsceneType.ENDING);
+        hasPlayedENDCutscene = true;
+    }
+
+    override function onSongRetry(event:ScriptEvent):Void
+    {
+        super.onSongRetry(event);
+        hideAllNotes();
+        hasPlayedCutscene = true;
+    }
+
+    override function onDestroy()
+    {
+        if (creditsImage != null) creditsImage.destroy();
+        if (titleText != null) titleText.destroy();
+        if (byText != null) byText.destroy();
+        if (staticOverlay != null) staticOverlay.destroy();
+        if (glitchOverlay != null) glitchOverlay.destroy();
+        if (overlayY != null) overlayY.destroy();
+        if (overlayX != null) overlayX.destroy();
+    }
+
+    function hideAllNotes():Void
+    {
+        var game = PlayState.instance;
+        if (game == null) return;
+
+        if (game.opponentStrumline != null && game.opponentStrumline.strumlineNotes != null)
+        {
+            for (i in 0...game.opponentStrumline.strumlineNotes.members.length)
+            {
+                var note = game.opponentStrumline.strumlineNotes.members[i];
+                if (note == null) continue;
+
+                FlxTween.cancelTweensOf(note);
+                note.visible = true;
+                note.alpha = 0;
+                note.angle = 0;
+            }
+        }
+
+        if (game.playerStrumline != null && game.playerStrumline.strumlineNotes != null)
+        {
+            for (i in 0...game.playerStrumline.strumlineNotes.members.length)
+            {
+                var note = game.playerStrumline.strumlineNotes.members[i];
+                if (note == null) continue;
+
+                FlxTween.cancelTweensOf(note);
+                note.visible = true;
+                note.alpha = 0;
+                note.angle = 0;
+            }
+        }
+    }
+
+    function fadeOutArrow(note:Int, time:Float):Void
+    {
+        var strum = getArrowNote(note);
+        if (strum == null) return;
+
+        FlxTween.cancelTweensOf(strum);
+        strum.visible = true;
+        FlxTween.tween(strum, { alpha: 0 }, time, { ease: FlxEase.quadOut });
+    }
+
+    function revealNoteSpin(note:Int, startAngle:Float, time:Float):Void
+    {
+        var strum = getArrowNote(note);
+        if (strum == null) return;
+
+        FlxTween.cancelTweensOf(strum);
+        strum.visible = true;
+        strum.alpha = 0;
+        strum.angle = startAngle;
+
+        FlxTween.tween(strum, { alpha: 1, angle: 0 }, time, { ease: FlxEase.cubeOut });
+    }
+
+    function getArrowNote(note:Int):StrumlineNote
+    {
+        var game = PlayState.instance;
+        if (game == null) return null;
+
+        if (note < 4)
+        {
+            if (game.opponentStrumline == null || game.opponentStrumline.strumlineNotes == null) return null;
+            return game.opponentStrumline.strumlineNotes.members[note];
+        }
+
+        if (game.playerStrumline == null || game.playerStrumline.strumlineNotes == null) return null;
+        return game.playerStrumline.strumlineNotes.members[note - 4];
+    }
+}

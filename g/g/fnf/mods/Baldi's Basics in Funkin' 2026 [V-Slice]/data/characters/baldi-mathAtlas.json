@@ -1,0 +1,392 @@
+{
+    "version": "1.0.0",
+    "name": "Baldi Mathatlas",
+    "renderType": "multianimateatlas",
+    "assetPath": "shared:mechanics/thinkpad/mathAtlas",
+    "singTime": 6.1,
+    "isPixel": false,
+    "scale": 0.325,
+    "healthIcon": {
+        "id": "baldi",
+        "isPixel": false,
+        "flipX": false,
+        "scale": 1
+    },
+    "animations": [
+        {
+            "name": "idle",
+            "prefix": ".export/idle baldi",
+            "offsets": [
+                0,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "idle-mad",
+            "prefix": ".export/idle baldi upset",
+            "offsets": [
+                0,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "basics",
+            "prefix": ".export/basics",
+            "offsets": [
+                76.9230769231,
+                49.2307692308
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "lesson-bad",
+            "prefix": ".export/lesson bad",
+            "offsets": [
+                73.8461538462,
+                24.6153846154
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "lesson-good",
+            "prefix": ".export/lesson good",
+            "offsets": [
+                55.3846153846,
+                49.2307692308
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "zero",
+            "prefix": ".export/zero",
+            "offsets": [
+                -9.23076923077,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "zero-mad",
+            "prefix": ".export/zero upset",
+            "offsets": [
+                -9.23076923077,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "one",
+            "prefix": ".export/one",
+            "offsets": [
+                3.07692307692,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "one-mad",
+            "prefix": ".export/one upset",
+            "offsets": [
+                3.07692307692,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "two",
+            "prefix": ".export/two",
+            "offsets": [
+                -3.07692307692,
+                21.5384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "two-mad",
+            "prefix": ".export/two upset",
+            "offsets": [
+                -3.07692307692,
+                21.5384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "four",
+            "prefix": ".export/four",
+            "offsets": [
+                -9.23076923077,
+                15.3846153846
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "four-mad",
+            "prefix": ".export/four upset",
+            "offsets": [
+                -9.23076923077,
+                15.3846153846
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "five",
+            "prefix": ".export/five",
+            "offsets": [
+                -3.07692307692,
+                6.15384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "five-mad",
+            "prefix": ".export/five upset",
+            "offsets": [
+                -3.07692307692,
+                6.15384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "six",
+            "prefix": ".export/six",
+            "offsets": [
+                -6.15384615385,
+                6.15384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "six-mad",
+            "prefix": ".export/six upset",
+            "offsets": [
+                -6.15384615385,
+                6.15384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "seven",
+            "prefix": ".export/seven",
+            "offsets": [
+                -3.07692307692,
+                21.5384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "seven-mad",
+            "prefix": ".export/seven upset",
+            "offsets": [
+                -3.07692307692,
+                21.5384615385
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "eight",
+            "prefix": ".export/eight",
+            "offsets": [
+                -3.07692307692,
+                3.07692307692
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "eight-mad",
+            "prefix": ".export/eight upset",
+            "offsets": [
+                -3.07692307692,
+                3.07692307692
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "nine",
+            "prefix": ".export/nine",
+            "offsets": [
+                -12.3076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "nine-mad",
+            "prefix": ".export/nine upset",
+            "offsets": [
+                -12.3076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "plus",
+            "prefix": ".export/plus",
+            "offsets": [
+                -9.23076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "plus-mad",
+            "prefix": ".export/plus upset",
+            "offsets": [
+                -9.23076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "minus",
+            "prefix": ".export/minus",
+            "offsets": [
+                -9.23076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "minus-mad",
+            "prefix": ".export/upset minus",
+            "offsets": [
+                -9.23076923077,
+                9.23076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "equals",
+            "prefix": ".export/equals",
+            "offsets": [
+                -9.23076923077,
+                18.4615384615
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "equals-mad",
+            "prefix": ".export/equals upset",
+            "offsets": [
+                -9.23076923077,
+                18.4615384615
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "failed",
+            "prefix": ".export/angry baldi",
+            "offsets": [
+                0,
+                12.3076923077
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "three-mad",
+            "prefix": ".export/three upset",
+            "offsets": [
+                15.3846153846,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "three",
+            "prefix": ".export/three",
+            "offsets": [
+                15.3846153846,
+                0
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "times",
+            "prefix": ".export/times",
+            "offsets": [
+                -3.07692307692,
+                18.4615384615
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        },
+        {
+            "name": "times-mad",
+            "prefix": ".export/times upset",
+            "offsets": [
+                -3.07692307692,
+                18.4615384615
+            ],
+            "frameRate": 24,
+            "frameIndices": [],
+            "animType": "symbol"
+        }
+    ],
+    "flipX": false
+}

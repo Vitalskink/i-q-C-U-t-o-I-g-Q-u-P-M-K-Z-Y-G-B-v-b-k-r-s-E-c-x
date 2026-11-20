@@ -1,0 +1,80 @@
+import funkin.play.character.MultiAnimateAtlasCharacter;
+import funkin.play.character.CharacterType;
+import funkin.play.PlayState;
+using StringTools;
+
+class BaldiCharacter extends MultiAnimateAtlasCharacter
+{
+  var lessonApplied:Bool = false;
+  var expulsionApplied:Bool = false;
+
+  function new()
+  {
+    super('baldi');
+  }
+
+  override function update(elapsed:Float)
+  {
+    super.update(elapsed);
+
+    if (!lessonApplied && PlayState.instance != null && PlayState.instance.currentSong != null)
+    {
+      if (PlayState.instance.currentSong.songName.toLowerCase() == "lesson")
+      {
+        this.idleSuffix = "-annoyed";
+        lessonApplied = true;
+      }
+    }
+
+    if (!expulsionApplied && PlayState.instance != null && PlayState.instance.currentSong != null)
+    {
+      if (PlayState.instance.currentSong.songName.toLowerCase() == "expulsion")
+      {
+        this.idleSuffix = "-mad";
+        expulsionApplied = true;
+      }
+    }
+  }
+
+  function playSingAnimation(dir, miss, ?suffix)
+  {
+    super.playSingAnimation(dir, miss, this.idleSuffix.replace("-", ""));
+  }
+
+  function set_idleSuffix(value:String):String
+  {
+    super.set_idleSuffix(value);
+
+    if(this.characterType == CharacterType.DAD)
+    {
+      switch (value)
+      {
+        case '-mad':
+          PlayState.instance.iconP2.configure({id: 'baldimad'});
+        case '-upset':
+          PlayState.instance.iconP2.configure({id: 'baldimid'});
+        case '-annoyed':
+          PlayState.instance.iconP2.configure({id: 'baldimid'});
+        default:
+          PlayState.instance.iconP2.configure({id: 'baldi'});
+      }
+    }
+
+    if(this.characterType == CharacterType.BF)
+    {
+      switch (value)
+      {
+        case '-mad':
+          PlayState.instance.iconP1.configure({id: 'baldimad'});
+        case '-upset':
+          PlayState.instance.iconP1.configure({id: 'baldimid'});
+        case '-annoyed':
+          PlayState.instance.iconP1.configure({id: 'baldimid'});
+        default:
+          PlayState.instance.iconP1.configure({id: 'baldi'});
+      }
+    }
+
+    return value;
+  }
+}

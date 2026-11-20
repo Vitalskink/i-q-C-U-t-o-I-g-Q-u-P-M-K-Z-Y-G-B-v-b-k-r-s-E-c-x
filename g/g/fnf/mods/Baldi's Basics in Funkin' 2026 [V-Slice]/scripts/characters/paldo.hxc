@@ -1,0 +1,75 @@
+import funkin.play.character.MultiAnimateAtlasCharacter;
+import funkin.play.character.CharacterType;
+import funkin.play.PlayState;
+using StringTools;
+
+class PaldoCharacter extends MultiAnimateAtlasCharacter
+{
+    public var blueApplied:Bool = false;
+
+    public function new()
+    {
+        super("paldo");
+    }
+
+    override function playSingAnimation(dir:Int, miss:Bool, ?suffix:String)
+    {
+        var suffixToUse:String = "";
+
+        if (this.idleSuffix != null)
+        {
+            suffixToUse = this.idleSuffix.replace("-", "");
+        }
+
+        super.playSingAnimation(dir, miss, suffixToUse);
+    }
+
+    override function set_idleSuffix(value:String):String
+    {
+        super.set_idleSuffix(value);
+
+        if (PlayState.instance != null)
+        {
+            if (this.characterType == CharacterType.BF)
+            {
+                switch (value)
+                {
+                    case "-blue":
+                        PlayState.instance.iconP1.configure({id: "paldo-blue"});
+                    default:
+                        PlayState.instance.iconP1.configure({id: "paldo"});
+                }
+            }
+            if (this.characterType == CharacterType.DAD)
+            {
+                switch (value)
+                {
+                    case "-blue":
+                        PlayState.instance.iconP2.configure({id: "paldo-blue"});
+                    default:
+                        PlayState.instance.iconP2.configure({id: "paldo"});
+                }
+            }
+        }
+
+        return value;
+    }
+
+    public function onStepHit(event:Dynamic):Void
+    {
+        var curStep:Int = 0;
+        try { curStep = event.step; } catch(e:Dynamic) { try { curStep = PlayState.instance.curStep; } catch(e2:Dynamic) { curStep = 0; } }
+
+        if (!blueApplied && PlayState.instance != null && PlayState.instance.currentSong != null)
+        {
+            if (PlayState.instance.currentSong.songName.toLowerCase() == "firewall")
+            {
+                if (curStep >= 864)
+                {
+                    this.idleSuffix = "-blue";
+                    blueApplied = true;
+                }
+            }
+        }
+    }
+}

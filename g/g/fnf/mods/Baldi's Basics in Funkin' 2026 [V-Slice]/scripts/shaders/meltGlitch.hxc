@@ -1,0 +1,12 @@
+import flixel.addons.display.FlxRuntimeShader;
+import funkin.Paths;
+import openfl.utils.Assets;
+
+class MeltGlitch extends FlxRuntimeShader
+{
+	public function new()
+	{
+		var fragText:String = Assets.getText(Paths.frag('meltGlitch'));
+		super(fragText);
+	}
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="baldipixel.png">
+	<!-- Created using the Spritesheet and XML generator -->
+	<!-- https://uncertainprod.github.io/FNF-Spritesheet-XML-generator-Web -->
+	<SubTexture name="confirm0001" x="84" y="0" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+	<SubTexture name="confirm0002" x="42" y="53" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+	<SubTexture name="confirm0003" x="42" y="0" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+	<SubTexture name="confirm0004" x="0" y="0" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+	<SubTexture name="confirm0005" x="0" y="53" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+	
+	<SubTexture name="confirm-hold0001" x="0" y="53" width="42" height="53" frameX="-6" frameY="-2" frameWidth="54" frameHeight="54"/>
+</TextureAtlas>

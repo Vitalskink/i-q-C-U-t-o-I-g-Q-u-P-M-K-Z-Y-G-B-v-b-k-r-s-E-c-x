@@ -1,0 +1,36 @@
+import funkin.play.PlayState;
+import funkin.modding.module.Module;
+import flixel.FlxG;
+
+class BaldiCamMovementModule extends Module
+{
+    public static var noteOffset:Float = 20;
+
+    public function new()
+    {
+        super("Camera Movement Mo");
+    }
+
+    override function onNoteHit(event):Void
+    {
+        super.onNoteHit(event);
+
+        if (PlayState.instance == null) return;
+        if (PlayState.instance.currentSong.id != "lesson" && PlayState.instance.currentSong.id != "basics" && PlayState.instance.currentSong.id != "lesson-good" && PlayState.instance.currentSong.id != "expulsion") return;
+        if (FlxG.camera.target == null) return;
+
+        FlxG.camera.targetOffset.set(0, 0);
+
+        switch (event.note.direction)
+        {
+            case 0:
+                FlxG.camera.targetOffset.x = -noteOffset;
+            case 1:
+                FlxG.camera.targetOffset.y = noteOffset;
+            case 2:
+                FlxG.camera.targetOffset.y = -noteOffset;
+            case 3:
+                FlxG.camera.targetOffset.x = noteOffset;
+        }
+    }
+}

@@ -1,0 +1,68 @@
+{
+ "version": "1.0.2",
+ "name": "Classroom",
+ "props": [
+  {
+   "assetPath": "stages/classroom/bg",
+   "atlasSettings": null,
+   "name": "bg1",
+   "position": [-1176, -1591],
+   "scale": 1,
+   "startingAnimation": ""
+  },
+  {
+   "assetPath": "stages/classroom/chairs",
+   "atlasSettings": null,
+   "name": "bg2",
+   "position": [569, -710],
+   "scale": 1,
+   "startingAnimation": "",
+   "zIndex": 1
+  },
+  {
+   "assetPath": "stages/classroom/chalkboards/default",
+   "atlasSettings": null,
+   "name": "bg3",
+   "position": [-689, -956],
+   "scale": 0.8,
+   "startingAnimation": "",
+   "zIndex": 2
+  },
+  {
+   "assetPath": "stages/classroom/table",
+   "atlasSettings": null,
+   "name": "bg4",
+   "position": [-673, -139],
+   "scale": 1,
+   "startingAnimation": "",
+   "zIndex": 500
+  },
+  {
+   "assetPath": "stages/classroom/blue_notebook",
+   "atlasSettings": null,
+   "name": "bg5",
+   "position": [65, -144],
+   "scale": 1,
+   "startingAnimation": "",
+   "zIndex": 501
+  }
+ ],
+ "characters": {
+  "bf": {
+   "cameraOffsets": [-400, -300],
+   "position": [1100, 10],
+   "zIndex": 300
+  },
+  "dad": {
+   "cameraOffsets": [150, -160],
+   "position": [-150, 0],
+   "zIndex": 200
+  },
+  "gf": {
+   "cameraOffsets": [0, 50],
+   "position": [200, -200],
+   "zIndex": 100
+  }
+ },
+ "cameraZoom": 0.65
+}

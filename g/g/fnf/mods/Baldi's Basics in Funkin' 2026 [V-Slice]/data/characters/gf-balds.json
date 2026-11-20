@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "name": "Gf",
+	"renderType": "multianimateatlas",
+    "assetPath": "shared:characters/gf/main",
+    "singTime": 4,
+    "isPixel": false,
+    "scale": 1.1,
+    "healthIcon": {
+        "id": "bf",
+        "isPixel": false,
+        "flipX": false,
+        "scale": 1
+    },
+    "animations": [
+        {
+            "name": "danceLeft",
+            "prefix": "gf",
+            "offsets": [
+                0,
+                0
+            ],
+            "frameRate": 18,
+            "frameIndices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        {
+            "name": "danceRight",
+            "prefix": "gf",
+            "offsets": [
+                0,
+                0
+            ],
+            "frameRate": 18,
+            "frameIndices": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19
+            ]
+        }
+    ],
+    "flipX": false
+}
