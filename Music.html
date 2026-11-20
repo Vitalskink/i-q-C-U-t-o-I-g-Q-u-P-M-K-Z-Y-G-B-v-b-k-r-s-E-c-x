@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="gams-version" content="1.7">
+    <title>Gams - Music</title>
+    <link rel="icon" type="image/png" href="img/music.png">
+    <link rel="stylesheet" href="assets/new.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            max-width: none;      /* new.min.css limits the page to 750px - remove that */
+        }
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 2px solid #1db954;
+            padding-bottom: 10px;
+        }
+        h1 {
+            color: #ffffff;
+            border: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 2rem;
+        }
+        .pl-top-btn {
+            background-color: #1db954;
+            color: #000;
+            border: none;
+            border-radius: 20px;
+            padding: 9px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .pl-top-btn:hover, .pl-top-btn:focus { background-color: #1db954; color: #000; filter: brightness(1.12); }
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 180px);
+            justify-content: start;
+            gap: 20px;
+            padding-top: 20px;
+        }
+        .artist-card {
+            background-color: #181818;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 0;
+            width: 180px;
+            box-sizing: border-box;
+            font: inherit;
+        }
+        .artist-card:hover {
+            transform: scale(1.04);
+            background-color: #282828;
+        }
+        .artist-thumb {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .pl-thumb { border-radius: 8px; }
+        .artist-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .artist-sub { color: #b3b3b3; font-size: 0.85rem; margin: 4px 0 0; }
+        .nav-links {
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .nav-links a {
+            color: #b3b3b3;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+        .empty-note {
+            color: #b3b3b3;
+            text-align: center;
+            padding: 60px 10px;
+            font-size: 1.1rem;
+        }
+        .panel {
+            background-color: #181818;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-top: 30px;
+            color: #b3b3b3;
+            font-size: 0.88rem;
+        }
+        .panel b { color: #fff; }
+        .panel .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .btn {
+            background-color: #333;
+            color: #fff;
+            border: 0;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn:hover, .btn:focus { background-color: #444; color: #fff; filter: none; }
+        .btn.green { background-color: #1db954; color: #000; }
+        .btn.green:hover, .btn.green:focus { background-color: #1ed760; color: #000; }
+        .btn.red { background-color: #e81123; color: #fff; }
+        .btn.red:hover, .btn.red:focus { background-color: #ff2a3d; color: #fff; }
+        .artist-card:focus { background-color: #181818; }
+        .edit-box { max-width: 560px; background: #181818; border-radius: 8px; padding: 20px; margin-top: 24px; }
+        .edit-box label { display: block; font-weight: bold; margin: 16px 0 6px; }
+        .edit-box label small { font-weight: normal; color: #b3b3b3; }
+        .edit-box input[type=text] { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0f0f0f; color: #fff; font-size: 1rem; }
+        .edit-box input[type=text]:focus { outline: 2px solid #1db954; border-color: transparent; }
+        .edit-box input[type=file] { color: #b3b3b3; max-width: 100%; }
+        .edit-cover { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .edit-cover img { width: 110px; height: 110px; border-radius: 8px; object-fit: cover; background: #222; }
+        .edit-actions { display: flex; gap: 10px; margin-top: 22px; }
+        .err { color: #ff6b6b; min-height: 1.2em; margin-top: 10px; }
+        .pl-head { display: flex; align-items: center; gap: 22px; padding-top: 20px; flex-wrap: wrap; }
+        .pl-head img { width: 150px; height: 150px; border-radius: 8px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.6); background: #222; }
+        .pl-head h2 { margin: 0 0 4px; font-size: 1.8rem; color: #fff; border: 0; padding: 0; }
+        .pl-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .pl-actions .btn { padding: 10px 18px; border-radius: 20px; font-size: 0.95rem; }
+        .song-box { background-color: #181818; border-radius: 8px; padding: 14px; margin-top: 24px; max-width: 1000px; }
+        .song-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 10px 12px; margin-bottom: 8px; border-radius: 6px; background-color: #202020;
+        }
+        .song-row:hover { background-color: #282828; }
+        .song-meta { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .song-meta img { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; background: #333; flex: none; }
+        .song-meta .t { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-meta .a { color: #b3b3b3; font-size: 0.85rem; }
+        .song-btns { display: flex; gap: 8px; flex: none; }
+        .toast { color: #1db954; margin-top: 8px; min-height: 1.2em; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-links">
+        <a id="homeLink" role="link" tabindex="0" style="cursor:pointer">Home</a> / 
+        <span style="color: #1db954;">Music</span>
+    </div>
+    <script>
+    (function () {
+        var target = 'Gams.html';
+        /* No href: the status bar would show the tunnel address on hover. */
+        var home = document.getElementById('homeLink');
+        if (home) {
+            home.addEventListener('click', function (event) {
+                event.preventDefault();
+                location.href = target;
+            });
+            home.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ' || event.keyCode === 13 || event.keyCode === 32) {
+                    event.preventDefault();
+                    location.href = target;
+                }
+            });
+        }
+    })();
+    </script>
+
+    <div class="top">
+        <h1 id="pageTitle">Music Catalog</h1>
+        <button class="pl-top-btn" id="topBtn">Playlists</button>
+    </div>
+
+    <div id="view"></div>
+
+<script src="m/musica.js"></script>
+    <script src="m/playlist-engine.js"></script>
+    <script>
+        // =========================================================================
+        // MANAGING ROOT DIRECTORIES: LINK ARTISTS HERE
+        // Relative linking matches your root dashboard hierarchy
+        // =========================================================================
+        const musicData = [
+            { name: "Eminem", href: "m/Eminem/artist.html", img: "m/Eminem/Eminem.png" },
+            { name: "Michael Jackson", href: "m/Michael_Jackson/artist.html", img: "m/Michael_Jackson/Michael_Jackson.png" },
+            { name: "Peso Pluma", href: "m/Peso_Pluma/artist.html", img: "m/Peso_Pluma/Peso_Pluma.png" },
+            { name: "Green Day", href: "m/Green_Day/artist.html", img: "m/Green_Day/Green_Day.png" },
+            { name: "Toby Fox", href: "m/Toby_Fox/artist.html", img: "m/Toby_Fox/Toby_Fox.png" }
+        ];
+
+        /* The server adds every artist folder found under m/ to the page. Keep
+           the hand-written names above and append only the new folders, so
+           dropping a folder in is enough and nothing here has to be edited. */
+        (function () {
+            var block = document.getElementById('gams-music');
+            if (!block) return;
+            try {
+                var data = JSON.parse(block.textContent);
+                var known = {};
+                musicData.forEach(function (artist) { known[artist.href] = true; });
+                (data && data.artists || []).forEach(function (artist) {
+                    if (!artist || !artist.href || known[artist.href]) return;
+                    known[artist.href] = true;
+                    musicData.push({ name: artist.name, href: artist.href, img: artist.img });
+                });
+            } catch (e) { /* keep the list above */ }
+        })();
+
+        const view = document.getElementById('view');
+        const pageTitle = document.getElementById('pageTitle');
+        const topBtn = document.getElementById('topBtn');
+        let screen = location.hash === '#playlists' ? 'playlists' : 'catalog';  // catalog | playlists | detail
+        let openName = null;
+
+        function el(tag, cls, text) {
+            const e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (text !== undefined) e.textContent = text;
+            return e;
+        }
+        function safeImg(src) {
+            const i = document.createElement('img');
+            i.onerror = () => { i.onerror = null; i.src = Playlists.placeholder; };
+            i.src = src;
+            return i;
+        }
+
+        function go(next, name) {
+            screen = next; openName = name || null;
+            history.replaceState(null, '', next === 'catalog' ? location.pathname : '#playlists');
+            render();
+        }
+        topBtn.onclick = () => go(screen === 'catalog' ? 'playlists' : 'catalog');
+
+        /* ---------- catalog (artists) ---------- */
+        function renderCatalog() {
+            pageTitle.textContent = 'Music Catalog';
+            topBtn.textContent = 'Playlists';
+            const grid = el('div', 'catalog-grid');
+            musicData.forEach(artist => {
+                const card = el('a', 'artist-card');
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    location.href = artist.href;
+                });
+                const image = el('img', 'artist-thumb');
+                image.src = artist.img;
+                image.alt = artist.name;
+                card.appendChild(image);
+                card.appendChild(el('p', 'artist-name', artist.name));
+                grid.appendChild(card);
+            });
+            view.appendChild(grid);
+        }
+
+        /* ---------- list of playlists ---------- */
+        function renderPlaylists() {
+            pageTitle.textContent = 'Playlists';
+            topBtn.textContent = '\u2190 Music Catalog';
+            const pls = Playlists.list();
+            if (!pls.length) {
+                view.appendChild(el('div', 'empty-note', 'Click on add to playlist in any song to create one'));
+            } else {
+                const grid = el('div', 'catalog-grid');
+                pls.forEach(pl => {
+                    const card = el('button', 'artist-card');
+                    const img = safeImg(Playlists.coverFor(pl));
+                    img.className = 'artist-thumb pl-thumb';
+                    card.appendChild(img);
+                    card.appendChild(el('p', 'artist-name', pl.name));
+                    card.appendChild(el('p', 'artist-sub', pl.songs.length + (pl.songs.length === 1 ? ' song' : ' songs')));
+                    card.onclick = () => go('detail', pl.name);
+                    grid.appendChild(card);
+                });
+                view.appendChild(grid);
+            }
+            view.appendChild(renderStoragePanel());
+        }
+
+        /* ---------- one playlist ---------- */
+        function renderDetail() {
+            const pl = Playlists.get(openName);
+            if (!pl) { go('playlists'); return; }
+            pageTitle.textContent = 'Playlists';
+            topBtn.textContent = '\u2190 All playlists';
+            topBtn.onclick = () => go('playlists');
+
+            const head = el('div', 'pl-head');
+            const img = safeImg(Playlists.coverFor(pl));
+            head.appendChild(img);
+            const info = el('div');
+            info.appendChild(el('h2', '', pl.name));
+            info.appendChild(el('div', 'artist-sub', pl.songs.length + (pl.songs.length === 1 ? ' song' : ' songs')));
+            const acts = el('div', 'pl-actions');
+            const playBtn = el('button', 'btn green', '\u25B6  Play in order');
+            playBtn.onclick = () => Musica.playQueue(pl.songs, { name: pl.name });
+            const shufBtn = el('button', 'btn green', '\uD83D\uDD00  Play shuffled');
+            shufBtn.onclick = () => Musica.playQueue(pl.songs, { name: pl.name, shuffle: true });
+            const editBtn = el('button', 'btn', '\u270E  Edit playlist');
+            editBtn.onclick = () => go('edit', pl.name);
+            const delBtn = el('button', 'btn red', 'Delete playlist');
+            delBtn.onclick = () => {
+                gamsAsk('Delete the playlist "' + pl.name + '"? (The songs themselves are not deleted.)', 'Delete').then(yes => {
+                    if (yes) { Playlists.remove(pl.name); go('playlists'); }
+                });
+            };
+            if (!pl.songs.length) { playBtn.disabled = shufBtn.disabled = true; }
+            acts.appendChild(playBtn); acts.appendChild(shufBtn); acts.appendChild(editBtn); acts.appendChild(delBtn);
+            info.appendChild(acts);
+            head.appendChild(info);
+            view.appendChild(head);
+
+            const box = el('div', 'song-box');
+            if (!pl.songs.length) box.appendChild(el('div', 'empty-note', 'This playlist is empty. Use "Add to playlist" on any song.'));
+            pl.songs.forEach((song, i) => {
+                const row = el('div', 'song-row');
+                const meta = el('div', 'song-meta');
+                meta.appendChild(safeImg(Playlists.coverFor({ songs: [song] })));
+                const txt = el('div');
+                txt.style.minWidth = '0';
+                txt.appendChild(el('div', 't', song.title));
+                txt.appendChild(el('div', 'a', song.artist));
+                meta.appendChild(txt);
+                const btns = el('div', 'song-btns');
+                const p = el('button', 'btn green', 'PLAY');
+                p.onclick = () => Musica.playQueue(pl.songs, { startIndex: i, name: pl.name });
+                const r = el('button', 'btn', 'Remove');
+                r.onclick = () => Playlists.removeSong(pl.name, i);
+                btns.appendChild(p); btns.appendChild(r);
+                row.appendChild(meta); row.appendChild(btns);
+                box.appendChild(row);
+            });
+            view.appendChild(box);
+        }
+
+        /* ---------- edit a playlist (rename / new cover) ---------- */
+        function renderEdit() {
+            const pl = Playlists.get(openName);
+            if (!pl) { go('playlists'); return; }
+            pageTitle.textContent = 'Edit Playlist';
+            topBtn.textContent = '\u2190 Back to playlist';
+            topBtn.onclick = () => go('detail', pl.name);
+
+            let newCover;                       // undefined = keep, null = use first song's picture, string = new image
+            const box = el('div', 'edit-box');
+
+            box.appendChild(el('label', '', 'Playlist name'));
+            const nameIn = document.createElement('input');
+            nameIn.type = 'text'; nameIn.maxLength = 60; nameIn.value = pl.name; nameIn.autocomplete = 'off';
+            box.appendChild(nameIn);
+
+            const lab = el('label', '', 'Cover image ');
+            lab.appendChild(el('small', '', '(optional)'));
+            box.appendChild(lab);
+            const coverRow = el('div', 'edit-cover');
+            const preview = safeImg(Playlists.coverFor(pl));
+            coverRow.appendChild(preview);
+            const side = el('div');
+            const fileIn = document.createElement('input');
+            fileIn.type = 'file'; fileIn.accept = 'image/png,image/*';
+            side.appendChild(fileIn);
+            const resetBtn = el('button', 'btn', 'Use the first song\u2019s picture');
+            resetBtn.style.display = 'block'; resetBtn.style.marginTop = '10px';
+            side.appendChild(resetBtn);
+            coverRow.appendChild(side);
+            box.appendChild(coverRow);
+
+            const err = el('div', 'err');
+            box.appendChild(err);
+
+            fileIn.onchange = async () => {
+                if (!fileIn.files[0]) return;
+                try { newCover = await Playlists.processCover(fileIn.files[0]); preview.src = newCover; err.textContent = ''; }
+                catch (e) { err.textContent = e.message; }
+            };
+            resetBtn.onclick = () => {
+                newCover = null; fileIn.value = '';
+                preview.src = Playlists.coverFor({ songs: pl.songs, cover: null });
+            };
+
+            const acts = el('div', 'edit-actions');
+            const save = el('button', 'btn green', 'Save changes');
+            const cancel = el('button', 'btn', 'Cancel');
+            const doSave = () => {
+                try {
+                    const changes = { name: nameIn.value };
+                    if (newCover !== undefined) changes.cover = newCover;
+                    const updated = Playlists.update(pl.name, changes);
+                    go('detail', updated.name);
+                } catch (e) { err.textContent = e.message; }
+            };
+            save.onclick = doSave;
+            nameIn.onkeydown = (e) => { if (e.key === 'Enter') doSave(); };
+            cancel.onclick = () => go('detail', pl.name);
+            acts.appendChild(save); acts.appendChild(cancel);
+            box.appendChild(acts);
+            view.appendChild(box);
+            setTimeout(() => nameIn.focus(), 30);
+        }
+
+        /* ---------- backup panel (export / import) ---------- */
+        function renderStoragePanel() {
+            const panel = el('div', 'panel');
+            const status = el('div');
+            status.innerHTML = '<b>Playlists are saved in this browser.</b> Use Export to make a backup file or move them to another device, and Import to load one.';
+            const row = el('div', 'row');
+            const toast = el('div', 'toast');
+            panel.appendChild(status); panel.appendChild(row); panel.appendChild(toast);
+
+            const exp = el('button', 'btn', 'Export playlists');
+            exp.onclick = () => {
+                if (!Playlists.list().length) { toast.textContent = 'You have no playlists to export yet.'; return; }
+                Playlists.exportAll();
+                toast.textContent = 'Saved Gams_playlists.json to your downloads \u2713';
+            };
+
+            const imp = el('button', 'btn', 'Import playlists');
+            const fileIn = document.createElement('input');
+            fileIn.type = 'file'; fileIn.accept = '.json,application/json'; fileIn.multiple = true; fileIn.style.display = 'none';
+            fileIn.onchange = async () => {
+                const n = await Playlists.importFiles(fileIn.files);
+                toast.textContent = n ? 'Imported ' + n + ' playlist' + (n === 1 ? '' : 's') + ' \u2713' : 'No new playlists found in that file.';
+                fileIn.value = '';
+            };
+            imp.onclick = () => fileIn.click();
+
+            row.appendChild(exp); row.appendChild(imp); row.appendChild(fileIn);
+            return panel;
+        }
+
+        function render() {
+            view.innerHTML = '';
+            topBtn.onclick = () => go(screen === 'catalog' ? 'playlists' : 'catalog');
+            if (screen === 'catalog') renderCatalog();
+            else if (screen === 'playlists') renderPlaylists();
+            else if (screen === 'edit') renderEdit();
+            else renderDetail();
+        }
+
+        Playlists.onChange(() => { if (screen === 'playlists' || screen === 'detail') render(); });
+        render();
+    </script>
+<!-- Browser alert/confirm dialogs print the site address in their title bar.
+     This card replaces them so the tunnel never shows. -->
+<div id="gamsAsk" style="display:none;position:fixed;inset:0;z-index:250;align-items:center;justify-content:center;background:rgba(0,0,0,.55)">
+    <div style="width:min(430px,calc(100vw - 32px));box-sizing:border-box;background:#181818;color:#fff;border:1px solid #333;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.6);font-family:inherit">
+        <p id="gamsAskText" style="margin:0 0 14px;font-size:14px;line-height:1.45;white-space:pre-line"></p>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button type="button" id="gamsAskNo" class="btn">Cancel</button>
+            <button type="button" id="gamsAskOk" class="btn" style="background:#c62828;color:#fff">OK</button>
+        </div>
+    </div>
+</div>
+<script>
+function gamsAsk(text, okLabel, withCancel) {
+    return new Promise(function (resolve) {
+        var box = document.getElementById('gamsAsk');
+        var ok = document.getElementById('gamsAskOk');
+        var no = document.getElementById('gamsAskNo');
+        document.getElementById('gamsAskText').textContent = text || '';
+        ok.textContent = okLabel || 'OK';
+        no.style.display = withCancel === false ? 'none' : '';
+        box.style.display = 'flex';
+        try { ok.focus(); } catch (e) { /* ignore */ }
+
+        function finish(value) {
+            box.style.display = 'none';
+            ok.onclick = null;
+            no.onclick = null;
+            document.removeEventListener('keydown', onKey, true);
+            resolve(value);
+        }
+        function onKey(event) {
+            if (event.key === 'Escape' || event.keyCode === 27) {
+                event.stopPropagation();
+                event.preventDefault();
+                finish(false);
+            }
+        }
+        ok.onclick = function () { finish(true); };
+        no.onclick = function () { finish(false); };
+        document.addEventListener('keydown', onKey, true);
+    });
+}
+</script>
+</body>
+</html>

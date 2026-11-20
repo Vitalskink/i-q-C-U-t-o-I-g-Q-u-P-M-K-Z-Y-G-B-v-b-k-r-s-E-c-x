@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gams</title>
+<meta name="gams-version" content="1.7">
+<link type="image/x-icon" rel="icon" href="img/gams-g.png">
+<link rel="stylesheet" href="assets/new.min.css">
+<style>
+html, body {
+transition: .5s;
+}
+
+/*Override max width of body set in new.css*/
+body {
+ max-width: 1000px;
+ position: relative; /* Keeps positioned update elements aligned within the layout view */
+}
+
+@font-face {
+font-family: 'facon';
+src: url('assets/facon.ttf') format('truetype');
+}
+
+.switch {
+position: relative;
+display: inline-block;
+width: 60px;
+height: 34px;
+}
+
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ccc;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+.slider:before {
+position: absolute;
+content: "";
+height: 26px;
+width: 26px;
+left: 4px;
+bottom: 4px;
+background-color: white;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+input:checked + .slider {
+background-color: #2196F3;
+}
+
+input:focus + .slider {
+box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+-webkit-transform: translateX(26px);
+-ms-transform: translateX(26px);
+transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+border-radius: 34px;
+}
+
+.slider.round:before {
+border-radius: 50%;
+}
+
+.title {
+font-size: 50pt;
+font-family: 'facon', sans-serif;
+letter-spacing: 3pt;
+}
+
+.tile {
+color: var(--nc-tx-1);
+height: auto;
+width: auto;
+border-radius: 10px;
+border: 1px solid var(--nc-tx-1);
+text-align: center;
+position: relative;
+float: left;
+margin: 20px;
+}
+
+.tile img {
+width: 200px;
+height: 200px;
+border-radius: 10px;
+}
+
+.tile:hover {
+font-weight: bold;
+cursor: pointer;
+background: var(--nc-bg-3);
+}
+
+.shade {
+opacity: 0.7;
+background-color: var(--nc-bg-3);
+position: fixed;
+width: 100%;
+height: 100vh;
+top: 0px;
+left: 0px;
+z-index: 100;
+display: block;
+}
+
+.cont {
+opacity: 1;
+color: var(--nc-tx-1);
+background-color: var(--nc-bg-3);
+z-index: 1000;
+width: calc(100vw - 70px);
+height: calc(100vh - 70px);
+border-radius: 10px;
+text-align: center;
+position: fixed;
+left: 50%;
+top: 50%;
+transform: translateX(-50%) translateY(-50%);
+}
+
+/* "On this tab" runs the game through the Gam.html wrapper so it can be
+   saved, and takes the whole window. */
+.overlay .cont {
+width: 100vw;
+height: 100vh;
+border-radius: 0;
+left: 0;
+top: 0;
+transform: none;
+}
+.overlay .cont iframe {
+border-radius: 0;
+display: block;
+}
+
+/* Loading a game: a real progress bar instead of a spinner. The bar follows
+   the wrapper's own start-up (frame opened, then "gams-ready" from the game). */
+.loader{
+position: fixed;
+inset: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+background: rgba(0,0,0,.45);
+z-index: 60;
+}
+.loader-card{
+width: min(420px, 84vw);
+padding: 20px 22px;
+border-radius: 14px;
+background: var(--nc-bg-1, #fff);
+color: var(--nc-tx-1, #111);
+box-shadow: 0 22px 60px rgba(0,0,0,.45);
+border: 1px solid rgba(127,127,127,.25);
+}
+.loader-title{
+font-size: 15px;
+font-weight: 700;
+margin-bottom: 12px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.loader-track{
+height: 10px;
+border-radius: 999px;
+background: rgba(127,127,127,.22);
+overflow: hidden;
+}
+.loader-fill{
+height: 100%;
+width: 0%;
+border-radius: 999px;
+background: linear-gradient(90deg, var(--nc-lk-2, #2f7dff), #66c8ff);
+transition: width .22s ease;
+}
+.loader-meta{
+display: flex;
+justify-content: space-between;
+gap: 12px;
+margin-top: 9px;
+font-size: 11px;
+letter-spacing: .04em;
+color: var(--nc-tx-2, #666);
+}
+.loader-meta .pct{font-variant-numeric: tabular-nums}
+@media (prefers-reduced-motion: reduce){
+.loader-fill{transition:none}
+}
+
+/* Version box: quiet grey while this copy matches the server, green when a
+   click can download only the missing pieces. The dock is a fixed, empty
+   layer across the top of the window, so the box cannot travel with the
+   content when it scrolls. (The tiles are floated, so the page body is much
+   shorter than the page itself and sticky cannot be used here.) */
+#versionDock {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+height: 0;
+z-index: 95;
+pointer-events: none;
+}
+
+.version-box {
+position: absolute;
+right: 10px;
+top: 60px;
+z-index: 90;
+max-width: min(260px, calc(100vw - 20px));
+text-align: center;
+font-family: var(--nc-font-sans), sans-serif;
+font-size: 10pt;
+font-weight: 700;
+line-height: 1.35;
+color: var(--nc-tx-1);
+background: var(--nc-bg-3);
+border: 1px solid var(--nc-tx-2);
+border-radius: 8px;
+padding: 7px 11px;
+cursor: pointer;
+pointer-events: auto;
+box-shadow: 0 4px 14px rgba(0,0,0,.25);
+transition: background .2s, border-color .2s, color .2s;
+}
+
+.version-box.update {
+background: #1db954;
+border-color: #1db954;
+color: #fff;
+cursor: pointer;
+}
+
+.version-box.busy { opacity: .75; cursor: progress; }
+
+/* Warnings ("Can't download new versions offline") must not look like the
+   green "there is an update" state. */
+.version-box.warn {
+background: #b3261e;
+border-color: #b3261e;
+color: #fff;
+}
+
+#tooOldCard {
+position: fixed;
+inset: 0;
+z-index: 260;
+display: none;
+align-items: center;
+justify-content: center;
+background: rgba(0,0,0,.55);
+}
+
+#tooOldCard .card {
+width: min(430px, calc(100vw - 32px));
+box-sizing: border-box;
+background: #181818;
+color: #fff;
+border: 1px solid #333;
+border-radius: 12px;
+padding: 18px;
+box-shadow: 0 10px 30px rgba(0,0,0,.6);
+font-family: inherit;
+text-align: center;
+}
+
+#tooOldCard p { margin: 0 0 10px; font-size: 15px; line-height: 1.45; }
+#tooOldCard a { color: #1db954; font-weight: 800; }
+#tooOldCard button { margin-top: 6px; }
+
+/* Choice card for the in-place updater: write the delta into the folder or
+   zip the person already has instead of downloading the site again. */
+#updateCard {
+position: fixed;
+inset: 0;
+z-index: 265;
+display: none;
+align-items: center;
+justify-content: center;
+background: rgba(0,0,0,.6);
+padding: 16px;
+}
+
+#updateCard .card {
+width: min(520px, calc(100vw - 32px));
+box-sizing: border-box;
+background: #181818;
+color: #fff;
+border: 1px solid #333;
+border-radius: 12px;
+padding: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,.6);
+font-family: inherit;
+}
+
+#updateCard h2 { margin: 0 0 8px; font-size: 18px; }
+#updateCard p { margin: 0 0 14px; font-size: 14px; line-height: 1.45; color: #cfcfcf; }
+#updateCard p.bad { color: #ff8a80; }
+#updateActions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.ubar {
+height: 8px;
+background: #2a2a2a;
+border-radius: 6px;
+overflow: hidden;
+margin: 0 0 14px;
+display: none;
+}
+.ubar.on { display: block; }
+.ubar i { display: block; height: 100%; width: 0; background: #1db954; transition: width .15s; }
+
+.gbtn.go { background: #1db954; border-color: #1db954; color: #000; }
+.gbtn.go:hover { border-color: #28e065; }
+/* ===== 6 tiles per row ===== */
+body { max-width: 1500px; }              /* was 1000px */
+:root { --cols: 6; }                     /* tiles per row */
+.tile {
+  box-sizing: border-box;
+  width: calc(100% / var(--cols) - 16.5px);   /* 100%/6 minus its margins */
+  margin: 8px;                           /* was 20px */
+}
+.tile img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+.tile .name { font-size: 0.9rem; margin: 10px 4px; }
+/* The invisible anchors inside game tiles only carry the wrapper address for
+   the tile's click handler. Keep them out of hit testing: hovering one would
+   print that address (the tunnel) in the browser's status bar. */
+.href { pointer-events: none; }
+/* smaller windows: fewer per row so the tiles never get tiny */
+@media (max-width: 1000px) { :root { --cols: 5; } }
+@media (max-width: 800px)  { :root { --cols: 4; } }
+@media (max-width: 600px)  { :root { --cols: 3; } }
+@media (max-width: 420px)  { :root { --cols: 2; } }
+
+/* ===== small shared buttons used by the update card ===== */
+.gbtn {
+border: 1px solid var(--nc-bg-3);
+background: var(--nc-bg-1);
+color: var(--nc-tx-1);
+border-radius: 8px;
+padding: 7px 12px;
+cursor: pointer;
+font-family: inherit;
+font-size: 0.85rem;
+font-weight: 600;
+}
+.gbtn:hover { border-color: var(--nc-lk-1); }
+a.gbtn { display: inline-block; text-decoration: none; }
+.muted { color: var(--nc-tx-2); font-size: 0.9rem; }
+</style>
+</head>
+
+<body onload="gamsOnload()">
+<!-- Silent version check: grey while this copy is current, green when it can
+     download only the missing games and songs. The dock sits first in the
+     body so it can stick to the top of the window. -->
+<div id="versionDock">
+ <button id="versionBox" class="version-box" type="button">This is Newest Version: 1.7</button>
+</div>
+
+<header>
+<h1 class="title">Gams</h1>
+</header>
+
+<div id="tooOldCard">
+ <div class="card">
+  <p>This version is too old to be updated</p>
+  <p>try going <a href="https://drive.google.com/drive/folders/1jwqhmGcnteKN5zwWkEyhRAR0mNsWT5ts" target="_blank" rel="noopener">HERE</a> and downloading <span id="tooOldVersion">1.7</span></p>
+  <button id="tooOldClose" class="gbtn" type="button">Close</button>
+ </div>
+</div>
+
+<div id="updateCard">
+ <div class="card">
+  <h2>Update Gams</h2>
+  <p id="updateStatus">Choose where this copy lives. The newest files are written straight into it.</p>
+  <div class="ubar" id="updateBar"><i id="updateFill"></i></div>
+  <div id="updateActions"></div>
+ </div>
+</div>
+
+<label>Dark Mode:</label>
+<label class="switch">
+<input id="darkModeInput" type="checkbox" checked oninput="changeTheme(this)">
+<span class="slider round"></span>
+</label>
+
+<br><br>
+
+<p id="totalGamesLine">Total Games: <span id="totalGames">Loading...</span></p>
+
+<label id="gamModeLabel">Open Gam Mode:</label>
+<select onchange='changeGamMode(this)' id='gamMode'>
+<option value="gam">In new tab</option>
+<option value="embed">On this tab</option>
+<option value="blank">In an about:blank tab</option>
+<option value="direct">Replace this tab</option>
+<option value="raw">Raw link in new tab</option>
+</select>
+
+<div class="overlay" id="overlay" style="display:none">
+<div class="shade" id="shade"></div>
+<div class="cont" id="cont">
+<iframe style="width:100%;height:100%;border-radius:10px" frameborder=0 id="mainGam"></iframe>
+
+<div class='loader' id='loader' style='display:none'>
+<div class='loader-card'>
+<div class='loader-title' id='loaderTitle'>Loading game…</div>
+<div class='loader-track'><div class='loader-fill' id='loaderFill'></div></div>
+<div class='loader-meta'><span id='loaderStep'>Opening the game…</span><span class='pct' id='loaderPct'>0%</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="contain">
+
+<a class="tile" role="link" tabindex="0" data-go="Settings.html" style="cursor:pointer"><img class="img" src="img/gams-g.png"><p class="name">Settings</p></a>
+<a class="tile" role="link" tabindex="0" data-go="g/about.html" style="cursor:pointer"><img class="img" src="img/gams-g.png"><p class="name">About</p></a>
+<a class="tile" role="link" tabindex="0" data-go="Music.html" style="cursor:pointer"><img class="img" src="img/music.png"><p class="name">Music</p></a>
+<a class="tile" role="link" tabindex="0" data-go="g/g/Zake.html" style="cursor:pointer"><img class="img" src="img/zaka.png"><p class="name">Zaka (Proxy)</p></a>
+</div>
+
+<div id="searcher">
+<div onclick="searchbar(this)" style="position:fixed; width: 50px; right: 10px; top: 10px; z-index: 100; font-size:13pt; transition: all 0.3s ease-in-out;"><svg style="max-width: 100%; fill: var(--nc-tx-2);" focusable="false" xmlns="http://w3.org" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></div>
+</div>
+
+<script>
+/* Remove anything the old offline build stored in this browser. Nothing is
+   saved here any more; this only cleans up after an older copy. */
+(function forgetOfflineLayer() {
+ try {
+  if (window.caches && caches.keys) {
+   caches.keys().then(function (keys) {
+    return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+   }).catch(function () { /* ignore */ });
+  }
+ } catch (e) { /* ignore */ }
+ try {
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+   navigator.serviceWorker.getRegistrations().then(function (list) {
+    return Promise.all(list.map(function (reg) { return reg.unregister().catch(function () {}); }));
+   }).catch(function () { /* ignore */ });
+  }
+ } catch (e) { /* ignore */ }
+})();
+
+try {
+ getStoredJSON("gams", {key: "gamMode"});
+} catch(e) {
+ localStorage.removeItem("gams");
+ storeJSON("gams", {key: "gamMode", value: "gam"})
+}
+
+const BroadcastDisguise = new BroadcastChannel('BroadcastDisguise');
+
+function l(e) {
+return document.getElementById(e);
+}
+
+function setLight() {
+document.documentElement.style.setProperty('--nc-tx-1', "#000000");
+document.documentElement.style.setProperty('--nc-tx-2', "#1A1A1A");
+document.documentElement.style.setProperty('--nc-bg-1', "#FFFFFF");
+document.documentElement.style.setProperty('--nc-bg-2', "#F6F8FA");
+document.documentElement.style.setProperty('--nc-bg-3', "#E5E7EB");
+document.documentElement.style.setProperty('--nc-lk-1', "#0070F3");
+document.documentElement.style.setProperty('--nc-lk-2', "#0366D6");
+document.documentElement.style.setProperty('--nc-lk-tx', "#FFFFFF");
+document.documentElement.style.setProperty('--nc-ac-1', "#79FFE1");
+document.documentElement.style.setProperty('--nc-ac-tx', "#0C4047");
+}
+
+function setDark() {
+document.documentElement.style.setProperty('--nc-tx-1', "#ffffff");
+document.documentElement.style.setProperty('--nc-tx-2', "#eeeeee");
+document.documentElement.style.setProperty('--nc-bg-1', "#000000");
+document.documentElement.style.setProperty('--nc-bg-2', "#111111");
+document.documentElement.style.setProperty('--nc-bg-3', "#222222");
+document.documentElement.style.setProperty('--nc-lk-1', "#3291FF");
+document.documentElement.style.setProperty('--nc-lk-2', "#0070F3");
+document.documentElement.style.setProperty('--nc-lk-tx', "#FFFFFF");
+document.documentElement.style.setProperty('--nc-ac-1', "#7928CA");
+document.documentElement.style.setProperty('--nc-ac-tx', "#FFFFFF");
+}
+
+function searchbar(elm) {
+elm.remove()
+l('searcher').innerHTML += `<input id="searchQuery" type="search" onload="startSearch()" onkeyup="startSearch()" placeholder="Search..." autocomplete="off" style="position:fixed; width: 20px; right: 10px; top: 10px; z-index: 100; font-size:13pt; transition: all 0.5s ease-in-out;" onblur="searchicon(this)" onfocus="this.style.width = '120px'">`;
+l('searchQuery').focus();
+l('searchQuery').style.width = '120px';
+}
+
+function searchicon(elm) {
+elm.style.width = '20px';
+setTimeout(function(){
+elm.remove();
+l('searcher').innerHTML += `<div onclick="searchbar(this)" style="position:fixed; width: 50px; right: 10px; top: 10px; z-index: 100; font-size:13pt; transition: all 0.3s ease-in-out;"><svg style="max-width: 100%; fill: var(--nc-tx-2);" focusable="false" xmlns="http://w3.org" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg></div>`;
+}, 500);
+}
+
+function getStoredJSON(key, data) {
+if (data && data.key && (localStorage[key] != 'null')) {
+var inStore = JSON.parse(localStorage[key]);
+if ((typeof inStore == 'object') && inStore.hasOwnProperty(data.key)) {
+return inStore[data.key];
+}
+}
+if (localStorage[key] && !data) {
+return JSON.parse(localStorage[key]);
+}
+return null;
+}
+
+function storeJSON(key, data) {
+if (localStorage[key]) {
+var inStore = JSON.parse(localStorage[key]) || {};
+inStore[data.key] = data.value;
+localStorage[key] = JSON.stringify(inStore);
+}else{
+var inStore = {};
+inStore[data.key] = data.value;
+localStorage[key] = JSON.stringify(inStore);
+}
+
+return localStorage[key];
+}
+
+function changeTheme(input) {
+var wantsDarkMode = (input.checked);
+if (wantsDarkMode) {
+setDark();
+storeJSON('gams', {
+key: 'theme',
+value: 'dark'
+})
+} else {
+setLight();
+storeJSON('gams', {
+key: 'theme',
+value: 'light'
+})
+}
+}
+
+function changeGamMode(input) {
+if (GAM_MODES.indexOf(input.value) === -1) { input.value = 'embed'; }
+storeJSON('gams', {
+key: 'gamMode',
+value: input.value
+});
+}
+
+function gamsOnload() {
+//Set Gam Mode (initGamMode already applies it)
+//Set gam Mode
+
+if (getStoredJSON('gams') && getStoredJSON('gams', {key: 'theme'})) {
+var theme = getStoredJSON('gams', {key: 'theme'});
+if (theme == 'light') {
+//eww you monster
+setLight();
+l('darkModeInput').checked = false;
+} else if (theme == 'dark') {
+setDark();
+l('darkModeInput').checked = true;
+}
+} else {
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+var newColorScheme = event.matches ? "dark" : "light";
+if (newColorScheme == 'dark') {
+l('darkModeInput').checked = true
+}
+if (newColorScheme == 'light') {
+l('darkModeInput').checked = false
+}
+});
+
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+l('darkModeInput').checked = true;
+} else {
+l('darkModeInput').checked = false;
+}
+}
+}
+
+l('shade').onclick = function() {
+closeOverlay();
+}
+
+function startSearch() {
+var input, filter, ul, li, a, i;
+input = l("searchQuery");
+filter = input.value.toUpperCase();
+ul = document.body;
+li = ul.getElementsByClassName("tile");
+for (i = 0; i < li.length; i++) {
+if (li[i].textContent.toUpperCase().indexOf(filter) > -1) {
+li[i].style.display = "";
+} else {
+li[i].style.display = "none";
+}
+}
+}
+
+function createElement(tag, prps) {
+var elm = document.createElement(tag);
+if (prps) {
+var props = Object.getOwnPropertyNames(prps);
+for (i=0;i<props.length;i++) {
+elm.setAttribute(props[i], prps[props[i]]);
+}
+}
+
+return elm;
+}
+
+var totalGames = 0;
+
+var gamsList = [
+{title: "Basic", type: "section"},
+{name: "Stickman Hook"},
+{name: "Drive Mad", href: "g/g/drivemad/drivemad.html"},
+{name: "Monster Tracks", href: "g/monstertracks.html", img: "img/monstertracks.png"},
+{name: "Bow Masters", href: "g/bowmasters.html", img: "img/bowmasters.png"},
+{name: "2048"},
+{name: "Cookie Clicker", href: "g/g/cookie/index.html"},
+{name: "Age Of War", href: "g/ageofwar.html", img: "img/ageofwar.png"},
+{name: "Age Of War 2", href: "g/ageofwar2.html", img: "img/ageofwar2.png"},
+{name: "8 Ball Classic", href: "g/8ballclassic.html", img: "img/8ballclassic.png"},
+{name: "Cube Field", href: "g/g/cubefield/index.html"},
+{name: "Spacebar Clicker"},
+{name: "Offline Paradise"},
+{name: "Sand Game"},
+{name: "Agario Lite"},
+{name: "Evil Glitch"},
+{name: "Its Raining Boxes"},
+{name: "T Rex"},
+{name: "Stack"},
+{name: "Rolling Forests"},
+{name: "Radius Raid"},
+{name: "Mountain Maze"},
+{name: "Fluid Simulator"},
+{name: "Edge Not Found"},
+{name: "Ninja vs EVILCORP"},
+{name: "Wordle"},
+{name: "We Become What We Behold", href: "g/webecomewhatwebehold.html", img: "img/webecomewhatwebehold.png"},
+{name: "Snowball IO", href: "g/snowballio.html", img: "img/snowballio.png"},
+{name: "Paper IO 2"},
+{name: "Bitlife", href: "g/bitlife.html", img: "img/bitlife.png"},
+{name: "Slope"},
+{name: "Burrito Bison", href: "g/g/burritobison/burritobison.html"},
+{name: "Tube Jumpers"},
+{name: "Hole IO"},
+{name: "Tunnel Rush", href: "g/g/tunnelrush/tunnelrush.html"},
+{name: "Tanuki Sunset", href: "g/g/tanukisunset/tanukisunset.html"},
+{name: "A Dance of Fire and Ice", href: "g/g/fireice/index.html"},
+{name: "Game Inside a Game", href: "g/g/gameinsideagame/index.html"},
+{name: "Cell Machine", href: "g/g/cellmachine/index.html"},
+{name: "Slope 2", href: "g/g/slope2/index.html"},
+{name: "Ai Creatures", href: "g/g/aicreatures/index.html"},
+{name: "Funny Battle", href: "g/funnybattle.html", img: "img/funnybattle.png"},
+{name: "Funny Battle 2", href: "g/funnybattle2.html", img: "img/funnybattle2.png"},
+{name: "Just Shapes And Beats", href: "g/jsab.html", img: "img/jsab.png"},
+
+{title: "Clasics", type: "section"},
+{name: "Celeste"},
+{name: "Geometry Dash"},
+{name: "Just One Boss"},
+{name: "Super Mario RPG"},
+{name: "Bad Time Simulator", href: "g/badtimesim.html", img: "img/badtimesim.png"},
+{name: "Friday Night Funkin'", href: "g/g/fnf/index.html", img: "img/fnf.png"},
+{name: "Fruit Ninja", href: "g/fruitninja.html", img: "img/fruitninja.png"},
+{name: "Tomb Of The Mask", href: "g/tombofthemask.html", img: "img/tombofthemask.png"},
+{name: "Plants Vs Zombies", href: "g/plantsvszombies.html", img: "img/plantsvszombies.png"},
+
+{title: "Retrogaming (Emulated)", type: "section"},
+{name: "Mario World + All Stars", href: "r/Mario _World _+_All-Stars.sfc", img: "img/marioworld+allstars.png"},
+{name: "Super Punch-Out!!", href: "r/Super_Punch-Out!!.sfc", img: "img/superpunchout!!.png"},
+{name: "Ocarina of Time", href: "r/Ocarina_of_Time.z64", img: "img/ocarinaoftime.png"},
+{name: "Super Mario 64", href: "r/Super_Mario_64.z64", img: "img/supermario64.png"},
+{name: "Smash Remix", href: "r/Smash_Remix.z64", img: "img/smashremix.png"},
+{name: "Mario Kart 64", href: "r/Mario_Kart_64.z64", img: "img/mariokart64.png"},
+{name: "GoldenEye 007", href: "r/GoldenEye_007.z64", img: "img/goldeneye007.png"},
+{name: "Star Fox 64", href: "r/Star_Fox_64.z64", img: "img/starfox64.png"},
+{name: "Tony Hawk's Pro Skater 3", href: "r/Tony_Hawk's_Pro_Skater_3.z64", img: "img/tonyhawksproskater3.png"},
+
+{title: "3D", type: "section"},
+{name: "SuperHot", href: "g/superhot.html", img: "img/superhot.png"},
+{name: "Kart Bros", href: "g/kartbros.html", img: "img/kartbros.png"},
+{name: "Glass City", href: "g/g/glasscity/glasscity.html"},
+{name: "Madalin Stunt Cars", href: "g/g/madalinstuntcars/madalinstuntcars.html"},
+{name: "Knight Wars", href: "g/wartheknights.html", img: "img/wartheknights.png"},
+{name: "Crazy Cattle", href: "g/crazycattle3D.html", img: "img/crazycattle3D.png"},
+{name: "Grey Box Testing", href: "g/g/greybox/index.html"},
+{name: "Snow Rider", href: "g/snowrider.html", img: "img/snowrider.png"},
+{name: "Funny Shooter", href: "g/funnyshooter.html", img: "img/funnyshooter.png"},
+{name: "1v1.LOL (no online)", href: "g/1v1.lol.html", img: "img/1v1.lol.png"},
+{name: "Blocky Snakes", href: "g/blockysnakes.html", img: "img/blockysnakes.png"},
+{name: "Polytrack", href: "g/polytrack.html", img: "img/polytrack.png"},
+{name: "Rocket Derby", href: "g/rocketsoccerderby.html", img: "img/rocketsoccerderby.png"},
+{name: "Bank Robbery 2", href: "g/bankrobbery2.html", img: "img/bankrobbery2.png"},
+{name: "Bank Robbery 3", href: "g/bankrobbery3.html", img: "img/bankrobbery3.png"},
+
+{title: "Online", type: "section"},
+{name: "Minecraft", href: "g/minecraft.html", img: "img/minecraft.png"},
+{name: "Among Us", href: "g/amongusscratch.html", img: "img/amongusscratch.png"},
+
+
+{title: "Horror", type: "section"},
+{name: "Granny", href: "g/granny.html", img: "img/granny.png"},
+{name: "Granny 2", href: "g/granny2.html", img: "img/granny2.png"},
+{name: "Escape The Backrooms", href: "g/backrooms.html", img: "img/backrooms.png"},
+{name: "Baldi's Basics", href: "g/baldisbasics.html", img: "img/baldisbasics.png"},
+{name: "Five Nights At Freddy's", href: "g/fnaf.html", img: "img/fnaf.png"},
+{name: "Five Nights At Freddy's 2", href: "g/fnaf2.html", img: "img/fnaf2.png"},
+{name: "Five Nights At Freddy's 3", href: "g/fnaf3.html", img: "img/fnaf3.png"},
+{name: "Five Nights At Freddy's 4", href: "g/fnaf4.html", img: "img/fnaf4.png"},
+{name: "Fnaf Ultimate Custom Night", href: "g/fnafucn.html", img: "img/fnafucn.png"},
+
+{title: "Henry Stickmin Flash", type: "section"},
+{name: "Breaking The Bank"},
+{name: "Escaping The Prison"},
+{name: "Stealing The Diamond"},
+{name: "Infiltrating The Airship"},
+{name: "Fleeing The Complex"},
+
+{title: "Flash", type: "section"},
+{name: "Bloxorz"},
+{name: "Pou", href: "g/pou.html", img: "img/pou.png"},
+{name: "State.io", href: "g/stateio.html", img: "img/stateio.png"},
+{name: "Zrist", href: "g/zrist.html", img: "img/zrist.png"},
+{name: "Murder", href: "g/murder.html", img: "img/murder.png"},
+{name: "YoHoHo.io", href: "g/yohohoio.html", img: "img/yohohoio.png"},
+{name: "Bad Piggies", href: "g/badpiggies.html", img: "img/badpiggies.png"},
+{name: "Angry Birds", href: "g/angrybirds.html", img: "img/angrybirds.png"},
+{name: "Angry Birds Space", href: "g/angrybirdsspace.html", img: "img/angrybirdsspace.png"},
+{name: "Angry Birds Showdown", href: "g/angrybirdsshowdown.html", img: "img/angrybirdsshowdown.png"},
+{name: "Ragdoll Hit", href: "g/ragdollhit.html", img: "img/ragdollhit.png"},
+{name: "Retro Bowl", href: "g/retrobowl.html", img: "img/retrobowl.png"},
+{name: "Wheelie Bike", href: "g/wheeliebike.html", img: "img/wheeliebike.png"},
+{name: "Tetris"},
+{name: "Flood Runner 4"},
+{name: "Raft Wars"},
+{name: "Raft Wars 2"},
+{name: "Worlds Hardest Game"},
+{name: "Worlds Hardest Game 2", href: "g/worldshardestgame2.html", img: "img/worldshardestgame2.jpg"},
+{name: "The Impossible Quiz"},
+{name: "Learn To Fly Idle"},
+{name: "Learn To Fly 1"},
+{name: "Learn To Fly 2"},
+{name: "Learn To Fly 3"},
+{name: "Bloons Tower Defense 1"},
+{name: "Bloons Tower Defense 2"},
+{name: "Bloons Tower Defense 5"},
+{name: "Melon Playground", href: "g/melonplayground.html", img: "img/melonplayground.png"},
+{name: "Zombie Rush", href: "g/zombierush.html", img: "img/zombierush.jpg"},
+{name: "Cat Ninja"},
+{name: "Unicycle Hero", href: "g/unicyclehero.html", img: "img/unicyclehero.png"},
+{name: "Pacman"},
+{name: "QWOP"},
+{name: "Use Boxmen"},
+{name: "40x Escape"},
+{name: "Stickman Life"},
+{name: "Duck Life 1"},
+{name: "Duck Life 2"},
+{name: "Duck Life 3"},
+{name: "Duck Life 4"},
+{name: "Duck Life 5"},
+{name: "Vex 6", href: "g/vex6.html", img: "img/vex6.jpg"},
+{name: "Subway Surfers Havana", href: "g/subwaysurfershavana.html", img: "img/subwaysurfershavana.png"},
+{name: "Opposite Day", href: "g/oppositeday.html", img: "img/oppositeday.png"},
+
+{title: "Multiplayer (same chromebook)", type: "section"},
+{name: "Wrestle Bros", href: "g/wrestlebros.html", img: "img/wrestlebros.png"},
+{name: "Karate Bros", href: "g/karatebros.html", img: "img/karatebros.png"},
+{name: "Baseball Bros", href: "g/baseballbros.html", img: "img/baseballbros.png"},
+{name: "Soccer Bros", href: "g/soccerbros.html", img: "img/soccerbros.png"},
+{name: "1 on 1 Soccer"},
+{name: "House Of Hazards", href: "g/houseofhazards.html", img: "img/houseofhazards.png"},
+{name: "Getaway Shootout", href: "g/getawayshootout.html", img: "img/getawayshootout.png"},
+{name: "Ping Pong Chaos", href: "g/pingpongchaos.html", img: "img/pingpongchaos.png"},
+{name: "Rooftop Snipers", href: "g/rooftopsnipers.html", img: "img/rooftopsnipers.png"},
+{name: "Rooftop Snipers 2", href: "g/rooftopsnipers2.html", img: "img/rooftopsnipers2.png"},
+{name: "Tag", href: "g/tag.html", img: "img/tag.png"},
+{name: "Basketball Stars", href: "g/basketballstars.html", img: "img/basketballstars.png"},
+
+{title: "Tycoon", type: "section"},
+{name: "Papa's Wingeria", href: "g/papaswingeria.html", img: "img/papaswingeria.png"},
+{name: "Papa's Tacomia", href: "g/papastacomia.html", img: "img/papastacomia.png"},
+{name: "Papa's Sushiria", href: "g/papassushiria.html", img: "img/papassushiria.png"},
+{name: "Papa's Scooperia", href: "g/papascooperia.html", img: "img/papascooperia.png"},
+{name: "Papa's Pizzeria", href: "g/papaspizzeria.html", img: "img/papaspizzeria.png"},
+{name: "Papa's Pastaria", href: "g/papaspastaria.html", img: "img/papaspastaria.png"},
+{name: "Papa's Pancakeria", href: "g/papaspancakeria.html", img: "img/papaspancakeria.png"},
+{name: "Papa's Hot Doggeria", href: "g/papashotdoggeria.html", img: "img/papashotdoggeria.png"},
+{name: "Papa's Freezeria", href: "g/papasfreezeria.html", img: "img/papasfreezeria.png"},
+{name: "Papa's Donuteria", href: "g/papasdonuteria.html", img: "img/papasdonuteria.png"},
+{name: "Papa's Cupcakeria", href: "g/papascupcakeria.html", img: "img/papascupcakeria.png"},
+{name: "Papa's Cheeseria", href: "g/papascheeseria.html", img: "img/papascheeseria.png"},
+{name: "Papa's Bakeria", href: "g/papasbakeria.html", img: "img/papasbakeria.png"},
+{name: "Papa's Burgeria", href: "g/papasburgeria.html", img: "img/papasburgeria.png"},
+{name: "Noob Miner", href: "g/noobminer.html", img: "img/noobminer.png"},
+{name: "Monkey Mart", href: "g/monkeymart.htm", img: "img/monkeymart.png"},
+{name: "Open TTD", href: "g/opentransporttycoondeluxe.html", img: "img/opentransporttycoondeluxe.png"},
+{name: "Idle Breakout", href: "g/idlebreakout.html", img: "img/idlebreakout.png"},
+
+{title: "Tools", type: "section"},
+{name: "Ruffle Flash Player", href: "g/g/Ruffle/Ruffle.html"},
+{name: "Code Editor", type: "section"},
+{name: "Web Retro"},
+];
+
+// =====================================================================
+//  RETRO GAMES (webretro)
+//  Put the ROM file in the "r" folder, open Prepare_ROMs.html once, then add a line to the list:
+//    {name: "Smash Bros", href: "r/Super_Smash_Bros.z64", img: "img/Super_Smash_Bros.png"},
+//  The system is guessed from the file ending (.z64 .n64 = N64, .smc .sfc = SNES, .nes = NES, .gb .gbc .gba = GameBoy).
+//  Only when it can't be guessed (for example a .zip) add the system:
+//    {name: "Paper Mario", href: "r/pm64.zip", img: "img/papermario.png", core: "n64"},
+//  core can be: n64, snes, nes, gb, gbc, gba   (or the libretro name: mupen64plus_next, snes9x, nestopia, mgba)
+// =====================================================================
+var RETRO_LAUNCHER = 'g/g/webretro/launch.html';
+var RETRO_CORES = {n64: 'mupen64plus_next', snes: 'snes9x', nes: 'nestopia', gb: 'mgba', gbc: 'mgba', gba: 'mgba', gameboy: 'mgba',
+                   mupen64plus_next: 'mupen64plus_next', snes9x: 'snes9x', nestopia: 'nestopia', mgba: 'mgba'};
+var RETRO_EXT = {z64: 'n64', n64: 'n64', v64: 'n64', smc: 'snes', sfc: 'snes', nes: 'nes', gb: 'gb', gbc: 'gbc', gba: 'gba'};
+function retroLink(entry) {
+  var href = entry.href || '';
+  var ext = (href.split('?')[0].split('.').pop() || '').toLowerCase();
+  if (!entry.core && !RETRO_EXT[ext] && ext !== 'zip') return null;      // a normal game
+  var key = String(entry.core || RETRO_EXT[ext] || '').toLowerCase();
+  var payload = {core: RETRO_CORES[key], rom: href, name: entry.name};
+  if (!payload.core) payload = {error: 'The game "' + entry.name + '" needs a system. Add core: "n64" (or snes, nes, gb, gbc, gba) to its line in Gams.html.'};
+  // everything travels as one url-safe value, so it survives the trip through the Gam.html wrapper
+  var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return RETRO_LAUNCHER + '?q=' + b64;
+}
+
+var container = createElement('div', {
+id: 'container'
+})
+
+var currentSection = undefined;
+for (j = 0; j < gamsList.length; j++){
+
+if (gamsList[j].title) {currentSection = gamsList[j].title}
+
+if(gamsList[j].name){
+totalGames += 1;
+var tile = createElement('div', {
+class : 'tile'
+});
+var imgName = (gamsList[j].name).toLowerCase().replace(/\s/g, '');
+var imgSrc = (gamsList[j].img) || 'img/' + imgName + '.png';
+var img = createElement('img', {
+  class : 'img',
+  src : imgSrc,
+});
+tile.appendChild(img);
+
+var p = createElement('p', {
+class : 'name'
+});
+p.innerHTML = gamsList[j].name;
+tile.appendChild(p);
+
+if (currentSection) {
+var section = createElement('span', {
+style: "display:none"
+});
+section.innerHTML = currentSection;
+tile.appendChild(section);
+}
+
+var modeX = createElement('span', {
+class: "modeX",
+style: "display:none"
+});
+modeX.innerHTML = gamsList[j].type;
+tile.appendChild(modeX);
+
+var aName = (gamsList[j].name).toLowerCase().replace(/\s/g, '');
+var aHref = (gamsList[j].href) || 'g/' + imgName + '.html';
+var retroHref = retroLink(gamsList[j]);
+if (retroHref) aHref = retroHref;
+var a = createElement('a', {
+class : 'href',
+href : aHref
+});
+tile.appendChild(a);
+container.appendChild(tile);
+}else if (gamsList[j].title){
+var title = createElement('h2', {
+style: "float:left;width:100%"
+});
+container.appendChild(createElement('br'));
+title.innerHTML = gamsList[j].title;
+container.appendChild(title);
+container.appendChild(createElement('br'));
+}
+}
+l('contain').appendChild(container);
+l('totalGames').innerText = totalGames;
+
+/* The server bakes the real catalog into this page. Use it to give every tile
+   its exact address (some names do not match their file, and emulated games
+   need the launcher query), without asking the browser to store anything. */
+(function applyEmbeddedCatalog() {
+ var block = document.getElementById('gams-games');
+ if (!block) return;
+ var data;
+ try { data = JSON.parse(block.textContent); } catch (e) { return; }
+ var byKey = {}, byName = {};
+ (data.games || []).forEach(function (game) {
+  byKey[(game.section + '|' + game.name).toLowerCase()] = game;
+  var name = String(game.name || '').toLowerCase();
+  if (!byName[name]) byName[name] = game;
+ });
+ var tiles = document.querySelectorAll('#container .tile');
+ for (var i = 0; i < tiles.length; i++) {
+  var tile = tiles[i];
+  var nameEl = tile.getElementsByClassName('name')[0];
+  if (!nameEl) continue;
+  var sectionEl = tile.querySelector('span:not(.modeX)');
+  var section = sectionEl ? sectionEl.textContent.trim() : '';
+  var name = nameEl.textContent.trim();
+  var game = byKey[(section + '|' + name).toLowerCase()] || byName[name.toLowerCase()];
+  if (!game) continue;
+  var link = tile.getElementsByClassName('href')[0];
+  if (!link) continue;
+  if (game.kind === 'retro') {
+   var retro = retroLink({ name: game.name, href: game.rom || game.href, core: game.core });
+   if (retro) link.href = retro;
+  } else if (game.href) {
+   link.href = game.href;
+  }
+ }
+})();
+
+/* ================================================================== */
+/* version check + delta update                                        */
+/* ================================================================== */
+/* Every way a tile can open. "raw" loads the game's own page, "direct"
+   replaces the menu tab, the rest go through the Gam.html wrapper. */
+var GAM_MODES = ['gam', 'embed', 'blank', 'direct', 'raw'];
+
+(function initGamMode() {
+ var sel = l('gamMode');
+ if (!sel) return;
+ var stored = getStoredJSON('gams', {key: 'gamMode'});
+ if (GAM_MODES.indexOf(stored) === -1) {
+  stored = 'embed';
+  storeJSON('gams', {key: 'gamMode', value: stored});
+ }
+ sel.disabled = false;
+ sel.title = 'Choose how games open';
+ sel.value = stored;
+})();
+
+var UPDATE_SERVER = 'https://complex-gams.ngrok.pizza';
+
+var clientVersion = '0';
+try {
+ var versionMeta = document.querySelector('meta[name="gams-version"]');
+ if (versionMeta) clientVersion = (versionMeta.getAttribute('content') || '').trim() || '0';
+} catch (e) { /* keep 0 */ }
+
+var versionBox = l('versionBox');
+var updateReady = false;
+var updating = false;
+var versionBase = 'This is Newest Version: ' + clientVersion;
+var flashTimer = 0;
+
+function setVersionBox(text, green, warn) {
+ if (!versionBox) return;
+ versionBox.textContent = text;
+ versionBox.className = 'version-box' + (warn ? ' warn' : green ? ' update' : '');
+}
+
+/* Short-lived answers ("Nothing Changed", "Can't download…") fall back to
+   whatever the badge should normally read. */
+function flashVersion(text, ms, warn) {
+ if (flashTimer) { clearTimeout(flashTimer); flashTimer = 0; }
+ setVersionBox(text, !warn, warn);
+ flashTimer = setTimeout(function () {
+  flashTimer = 0;
+  setVersionBox(updateReady ? 'Click here to update' : versionBase, updateReady);
+ }, ms || 6000);
+}
+
+function isOffline() {
+ try { return navigator.onLine === false; } catch (e) { return false; }
+}
+
+function showTooOld(show) {
+ var card = l('tooOldCard');
+ if (card) card.style.display = show ? 'flex' : 'none';
+}
+
+function stopBusy() {
+ updating = false;
+ if (versionBox) versionBox.classList.remove('busy');
+}
+
+setVersionBox(versionBase, false);
+
+function getServerVersion() {
+ return new Promise(function (resolve, reject) {
+  var done = false;
+  var timer = setTimeout(function () {
+   if (done) return;
+   done = true;
+   reject(new Error('timeout'));
+  }, 8000);
+  fetch(UPDATE_SERVER + '/version.txt?t=' + Date.now(), { cache: 'no-store', mode: 'cors' })
+   .then(function (res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.text();
+   })
+   .then(function (text) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    resolve(String(text || '').trim());
+   })
+   .catch(function (err) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    reject(err);
+   });
+ });
+}
+
+getServerVersion().then(function (serverVersion) {
+ /* The download card should name the version the server is handing out. */
+ if (serverVersion && /^[0-9A-Za-z._-]{1,32}$/.test(serverVersion)) {
+  var v = l('tooOldVersion');
+  if (v) v.textContent = serverVersion;
+ }
+ if (!serverVersion || serverVersion === clientVersion) return;
+ updateReady = true;
+ setVersionBox('Click here to update', true);
+}).catch(function () { /* stay on the quiet grey box */ });
+
+/* ================================================================== */
+/* in-place updater                                                    */
+/* ================================================================== */
+/* The update is written into the copy someone already has: their folder
+   (Chrome/Edge folder picker, remembered between visits) or the .zip they
+   were given. Only the files that actually differ travel. A page opened
+   without either can still just download the delta. */
+
+var UPD_SKIP_DIRS = { _legacy: 1, tools: 1, node_modules: 1 };
+var UPD_SKIP_FILES = {
+ 'Gams-removed-files.txt': 1,
+ 'data/games.json': 1,
+ 'data/files.json': 1,
+ 'data/music.json': 1,
+ 'data/catalog.source.json': 1
+};
+
+var updateCard = l('updateCard');
+var updateStatusEl = l('updateStatus');
+var updateActionsEl = l('updateActions');
+var pendingUpdate = null;
+
+function showUpdateCard(show) {
+ if (updateCard) updateCard.style.display = show ? 'flex' : 'none';
+}
+
+function setStatus(text, bad) {
+ if (!updateStatusEl) return;
+ updateStatusEl.textContent = text;
+ updateStatusEl.className = bad ? 'bad' : '';
+}
+
+function setUpdateProgress(done, total) {
+ var bar = l('updateBar');
+ var fill = l('updateFill');
+ if (!bar || !fill) return;
+ if (!total) {
+  bar.className = 'ubar';
+  fill.style.width = '0';
+  return;
+ }
+ bar.className = 'ubar on';
+ fill.style.width = Math.min(100, Math.round((done / total) * 100)) + '%';
+}
+
+function updateButtons(items) {
+ if (!updateActionsEl) return;
+ updateActionsEl.innerHTML = '';
+ (items || []).forEach(function (item) {
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'gbtn' + (item.primary ? ' go' : '');
+  button.textContent = item.label;
+  button.addEventListener('click', item.run);
+  updateActionsEl.appendChild(button);
+ });
+}
+
+function closeUpdateCard() {
+ showUpdateCard(false);
+ pendingUpdate = null;
+ setUpdateProgress(0, 0);
+ stopBusy();
+ idleBadge();
+}
+
+/* Whatever the badge should read when nothing is happening. */
+function idleBadge() {
+ setVersionBox(updateReady ? 'Click here to update' : versionBase, updateReady);
+}
+
+/* Remembering a handle uses the same trick as Prepare_ROMs: Chrome keeps the
+   folder/file handle in IndexedDB, the permission is asked again when needed. */
+function updDb() {
+ return new Promise(function (resolve, reject) {
+  var req = indexedDB.open('gams_updater', 1);
+  req.onupgradeneeded = function () { req.result.createObjectStore('h'); };
+  req.onsuccess = function () { resolve(req.result); };
+  req.onerror = function () { reject(req.error); };
+ });
+}
+
+function updStore(op, key, value) {
+ return updDb().then(function (db) {
+  return new Promise(function (resolve, reject) {
+   var tx = db.transaction('h', op === 'get' ? 'readonly' : 'readwrite');
+   var store = tx.objectStore('h');
+   var req = op === 'get' ? store.get(key) : store.put(value, key);
+   tx.oncomplete = function () { resolve(req.result); };
+   tx.onerror = function () { reject(tx.error); };
+   tx.onabort = function () { reject(tx.error); };
+  });
+ }).catch(function () { return null; });
+}
+
+function savedTarget() {
+ return Promise.all([updStore('get', 'last'), updStore('get', 'root'), updStore('get', 'zip')])
+  .then(function (got) {
+   var last = got[0], root = got[1], zip = got[2];
+   var handle = null;
+   if (last === 'zip' && zip) handle = zip;
+   else if (last === 'root' && root) handle = root;
+   else handle = root || zip || null;
+   if (!handle) return null;
+   return { handle: handle, kind: handle.kind === 'directory' ? 'folder' : 'zip' };
+  });
+}
+
+function targetPermission(target, ask) {
+ var handle = target.handle;
+ var opts = { mode: 'readwrite' };
+ var first = handle.queryPermission
+  ? handle.queryPermission(opts).catch(function () { return 'denied'; })
+  : Promise.resolve('granted');
+ return first.then(function (state) {
+  if (state === 'granted') return 'granted';
+  if (ask && handle.requestPermission) {
+   return handle.requestPermission(opts).catch(function () { return 'denied'; });
+  }
+  return state;
+ });
+}
+
+function updListingSkip(rel) {
+ if (!rel) return true;
+ var lower = rel.toLowerCase();
+ if (lower.charAt(0) === '.' || lower.indexOf('/.') !== -1) return true;
+ if (UPD_SKIP_FILES[rel]) return true;
+ if (/^gams-update-.*\.zip$/i.test(rel)) return true;
+ var top = lower.split('/')[0];
+ if (UPD_SKIP_DIRS[top]) return true;
+ return false;
+}
+
+/* The client's real file list: that is what lets the server see new game
+   pages, icons, music and ROMs, none of which the page's own size manifest
+   carries. */
+async function folderListing(root) {
+ var files = [];
+ async function walk(dir, prefix) {
+  var it = dir.entries ? dir.entries() : dir.values();
+  for await (var pair of it) {
+   var name = pair[0];
+   var handle = pair[1];
+   if (name.charAt(0) === '.') continue;
+   if (handle.kind === 'directory') {
+    if (UPD_SKIP_DIRS[name]) continue;
+    await walk(handle, prefix + name + '/');
+    continue;
+   }
+   var rel = prefix + name;
+   if (updListingSkip(rel)) continue;
+   var file = await handle.getFile();
+   files.push([rel, file.size]);
+  }
+ }
+ await walk(root, '');
+ return files;
+}
+
+/* ---- zip reading ------------------------------------------------- */
+
+function le16(bytes, at) { return bytes[at] | (bytes[at + 1] << 8); }
+function le32(bytes, at) {
+ return (bytes[at] | (bytes[at + 1] << 8) | (bytes[at + 2] << 16) | (bytes[at + 3] << 24)) >>> 0;
+}
+/* Zip64 values are stored as two 32-bit halves; up to 2^53 this stays exact. */
+function u64(bytes, at) { return le32(bytes, at) + le32(bytes, at + 4) * 4294967296; }
+function put64(view, at, value) {
+ view.setUint32(at, value % 4294967296, true);
+ view.setUint32(at + 4, Math.floor(value / 4294967296), true);
+}
+
+async function zipDir(blob) {
+ if (!blob || blob.size < 22) throw new Error('This file is not a zip.');
+ var tailLen = Math.min(blob.size, 66000);
+ var tail = new Uint8Array(await blob.slice(blob.size - tailLen).arrayBuffer());
+ var at = -1;
+ for (var i = tail.length - 22; i >= 0; i--) {
+  if (le32(tail, i) !== 0x06054b50) continue;
+  if (i + 22 + le16(tail, i + 20) !== tail.length) continue;
+  at = i;
+  break;
+ }
+ if (at < 0) {
+  for (var j = tail.length - 22; j >= 0; j--) {
+   if (le32(tail, j) === 0x06054b50) { at = j; break; }
+  }
+ }
+ if (at < 0) throw new Error('This file is not a zip.');
+ var count = le16(tail, at + 10);
+ var cdSize = le32(tail, at + 12);
+ var cdOffset = le32(tail, at + 16);
+
+ /* A zip bigger than 4 GB keeps its real numbers in a zip64 record just
+    before the normal end record. */
+ var zip64 = false;
+ if (count === 0xffff || cdSize === 0xffffffff || cdOffset === 0xffffffff) {
+  var locator = at - 20;
+  if (locator >= 0 && le32(tail, locator) === 0x07064b50) {
+   var record = u64(tail, locator + 8);
+   if (record + 56 <= blob.size) {
+    var rec = new Uint8Array(await blob.slice(record, record + 56).arrayBuffer());
+    if (rec.length === 56 && le32(rec, 0) === 0x06064b50) {
+     count = u64(rec, 32);
+     cdSize = u64(rec, 40);
+     cdOffset = u64(rec, 48);
+     zip64 = true;
+    }
+   }
+  }
+ }
+ if (cdSize === 0xffffffff || cdOffset === 0xffffffff) {
+  throw new Error('This zip is damaged.');
+ }
+ if (cdOffset + cdSize > blob.size) throw new Error('This zip is damaged.');
+ return { size: blob.size, cdOffset: cdOffset, cdSize: cdSize, count: count, zip64: zip64 };
+}
+
+async function zipEntries(blob, dir) {
+ var bytes = new Uint8Array(await blob.slice(dir.cdOffset, dir.cdOffset + dir.cdSize).arrayBuffer());
+ var decoder = new TextDecoder();
+ var out = [];
+ var at = 0;
+ while (at + 46 <= bytes.length && le32(bytes, at) === 0x02014b50) {
+  var nameLen = le16(bytes, at + 28);
+  var extraLen = le16(bytes, at + 30);
+  var commentLen = le16(bytes, at + 32);
+  var total = 46 + nameLen + extraLen + commentLen;
+  var csize = le32(bytes, at + 20);
+  var usize = le32(bytes, at + 24);
+  var local = le32(bytes, at + 42);
+
+  /* zip64 puts the real numbers in an extra field, in this order, only for
+     the ones that overflowed. */
+  if (usize === 0xffffffff || csize === 0xffffffff || local === 0xffffffff) {
+   var extra = at + 46 + nameLen;
+   var stop = extra + extraLen;
+   while (extra + 4 <= stop) {
+    var id = le16(bytes, extra);
+    var size = le16(bytes, extra + 2);
+    var body = extra + 4;
+    if (id === 0x0001) {
+     var q = body;
+     if (usize === 0xffffffff && q + 8 <= body + size) { usize = u64(bytes, q); q += 8; }
+     if (csize === 0xffffffff && q + 8 <= body + size) { csize = u64(bytes, q); q += 8; }
+     if (local === 0xffffffff && q + 8 <= body + size) { local = u64(bytes, q); q += 8; }
+     break;
+    }
+    extra = body + size;
+   }
+  }
+
+  out.push({
+   name: decoder.decode(bytes.subarray(at + 46, at + 46 + nameLen)),
+   method: le16(bytes, at + 10),
+   crc: le32(bytes, at + 16),
+   csize: csize,
+   usize: usize,
+   local: local,
+   raw: bytes.slice(at, at + total)
+  });
+  at += total;
+ }
+ return out;
+}
+
+async function entryRange(blob, entry) {
+ var head = new Uint8Array(await blob.slice(entry.local, entry.local + 30).arrayBuffer());
+ if (head.length < 30 || le32(head, 0) !== 0x04034b50) throw new Error('This zip is damaged.');
+ var start = entry.local + 30 + le16(head, 26) + le16(head, 28);
+ return { start: start, end: start + entry.csize };
+}
+
+/* Distributions often wrap everything in one top-level folder. The server
+   works with paths like "g/x.html", so that wrapper is stripped on the way
+   in and put back on the way out. */
+function zipPrefix(entries) {
+ var first = null;
+ for (var i = 0; i < entries.length; i++) {
+  var name = entries[i].name.replace(/\\/g, '/');
+  if (!name || name.charAt(name.length - 1) === '/') continue;
+  if (name.indexOf('/') === -1) return '';
+  var segment = name.split('/')[0];
+  if (first === null) first = segment;
+  else if (first !== segment) return '';
+ }
+ if (!first) return '';
+ if (/^(g|img|m|r|assets)$/i.test(first)) return '';
+ if (/\.[a-z0-9]+$/i.test(first)) return '';
+ return first + '/';
+}
+
+async function zipListing(blob) {
+ var dir = await zipDir(blob);
+ var entries = await zipEntries(blob, dir);
+ var prefix = zipPrefix(entries);
+ var files = [];
+ var hasPage = false;
+ for (var i = 0; i < entries.length; i++) {
+  var name = entries[i].name.replace(/\\/g, '/');
+  if (!name || name.charAt(name.length - 1) === '/') continue;
+  if (prefix) {
+   if (name.indexOf(prefix) !== 0) continue;
+   name = name.slice(prefix.length);
+  }
+  if (!name) continue;
+  if (name.toLowerCase() === 'gams.html') hasPage = true;
+  if (updListingSkip(name)) continue;
+  files.push([name, entries[i].usize]);
+ }
+ return { files: files, prefix: prefix, hasPage: hasPage, entries: entries, dir: dir };
+}
+
+/* ---- zip writing ------------------------------------------------- */
+
+function zipLocalHeader(name, crc, size) {
+ /* Version 45 plus a zip64 extra field once a single file passes 4 GB. */
+ var big = size > 0xffffffff;
+ var extra = big ? 20 : 0;
+ var out = new Uint8Array(30 + name.length + extra);
+ var view = new DataView(out.buffer);
+ view.setUint32(0, 0x04034b50, true);
+ view.setUint16(4, big ? 45 : 20, true);
+ view.setUint16(6, 0x0800, true);          // UTF-8 names
+ view.setUint16(8, 0, true);               // stored
+ view.setUint16(10, 0, true);              // time
+ view.setUint16(12, 0x5c21, true);         // 2026-01-01
+ view.setUint32(14, crc >>> 0, true);
+ view.setUint32(18, big ? 0xffffffff : size, true);
+ view.setUint32(22, big ? 0xffffffff : size, true);
+ view.setUint16(26, name.length, true);
+ view.setUint16(28, extra, true);
+ out.set(name, 30);
+ if (big) {
+  var at = 30 + name.length;
+  view.setUint16(at, 0x0001, true);
+  view.setUint16(at + 2, 16, true);
+  put64(view, at + 4, size);
+  put64(view, at + 12, size);
+ }
+ return out;
+}
+
+function zipCentralRecord(name, crc, size, offset) {
+ var bigSize = size > 0xffffffff;
+ var bigOffset = offset > 0xffffffff;
+ var extra = (bigSize ? 16 : 0) + (bigOffset ? 8 : 0);
+ var out = new Uint8Array(46 + name.length + (extra ? extra + 4 : 0));
+ var view = new DataView(out.buffer);
+ view.setUint32(0, 0x02014b50, true);
+ view.setUint16(4, extra ? 45 : 20, true);
+ view.setUint16(6, extra ? 45 : 20, true);
+ view.setUint16(8, 0x0800, true);          // UTF-8 names
+ view.setUint16(10, 0, true);              // stored
+ view.setUint16(12, 0, true);              // time
+ view.setUint16(14, 0x5c21, true);         // 2026-01-01
+ view.setUint32(16, crc >>> 0, true);
+ view.setUint32(20, bigSize ? 0xffffffff : size, true);
+ view.setUint32(24, bigSize ? 0xffffffff : size, true);
+ view.setUint16(28, name.length, true);
+ view.setUint16(30, extra ? extra + 4 : 0, true);
+ view.setUint32(42, bigOffset ? 0xffffffff : offset, true);
+ out.set(name, 46);
+ if (extra) {
+  var at = 46 + name.length;
+  view.setUint16(at, 0x0001, true);
+  view.setUint16(at + 2, extra, true);
+  var q = at + 4;
+  if (bigSize) { put64(view, q, size); q += 8; put64(view, q, size); q += 8; }
+  if (bigOffset) { put64(view, q, offset); q += 8; }
+ }
+ return out;
+}
+
+/* The end of the archive: a plain record, or the zip64 pair in front of it
+   once any value stops fitting in 32 bits. */
+function zipEnding(count, cdSize, cdOffset) {
+ var big = count >= 0xffff || cdSize >= 0xffffffff || cdOffset >= 0xffffffff;
+ var parts = [];
+ var extra = 0;
+ if (big) {
+  var record = new Uint8Array(56);
+  var rv = new DataView(record.buffer);
+  rv.setUint32(0, 0x06064b50, true);
+  put64(rv, 4, 44);
+  rv.setUint16(12, 45, true);
+  rv.setUint16(14, 45, true);
+  rv.setUint32(16, 0, true);
+  rv.setUint32(20, 0, true);
+  put64(rv, 24, count);
+  put64(rv, 32, count);
+  put64(rv, 40, cdSize);
+  put64(rv, 48, cdOffset);
+  parts.push({ pos: cdOffset + cdSize, data: record });
+
+  var locator = new Uint8Array(20);
+  var lv = new DataView(locator.buffer);
+  lv.setUint32(0, 0x07064b50, true);
+  lv.setUint32(4, 0, true);
+  put64(lv, 8, cdOffset + cdSize);
+  lv.setUint32(16, 1, true);
+  parts.push({ pos: cdOffset + cdSize + 56, data: locator });
+  extra = 76;
+ }
+
+ var end = new Uint8Array(22);
+ var ev = new DataView(end.buffer);
+ ev.setUint32(0, 0x06054b50, true);
+ ev.setUint16(8, Math.min(count, 0xffff), true);
+ ev.setUint16(10, Math.min(count, 0xffff), true);
+ ev.setUint32(12, Math.min(cdSize, 0xffffffff), true);
+ ev.setUint32(16, Math.min(cdOffset, 0xffffffff), true);
+ parts.push({ pos: cdOffset + cdSize + extra, data: end });
+ return { parts: parts, size: extra + 22 };
+}
+
+/* "These files are no longer part of the newest version: ..." -> paths. The
+   note is prose, a blank line, then one path per line. */
+function removalList(text) {
+ if (!text) return [];
+ var lines = String(text).replace(/\r/g, '').split('\n');
+ var start = 0;
+ for (var i = 0; i < lines.length; i++) {
+  if (!lines[i].trim()) { start = i + 1; break; }
+ }
+ var out = [];
+ for (; start < lines.length; start++) {
+  var line = lines[start].trim().replace(/\\/g, '/');
+  if (line) out.push(line);
+ }
+ return out;
+}
+
+/* Works out every byte that has to be written into an existing zip to bring it
+   up to date: new files go where the old directory started, replaced ones are
+   dropped from the directory, and only the directory itself is rebuilt. */
+async function planZipPatch(target, update, prefix) {
+ var tdir = await zipDir(target);
+ var told = await zipEntries(target, tdir);
+ var udir = await zipDir(update);
+ var upded = await zipEntries(update, udir);
+
+ prefix = prefix || '';
+
+ var incoming = [];
+ var note = null;
+ for (var i = 0; i < upded.length; i++) {
+  var entry = upded[i];
+  var rel = entry.name.replace(/\\/g, '/');
+  if (!rel || rel.charAt(rel.length - 1) === '/') continue;
+  if (rel === 'Gams-removed-files.txt') { note = entry; continue; }
+  if (entry.method !== 0) throw new Error('This update is compressed and cannot be applied in place.');
+  incoming.push(entry);
+ }
+
+ var gone = new Set();
+ if (note) {
+  var noteRange = await entryRange(update, note);
+  var noteText = new TextDecoder().decode(
+   new Uint8Array(await update.slice(noteRange.start, noteRange.end).arrayBuffer()));
+  removalList(noteText).forEach(function (path) { gone.add(prefix + path); });
+ }
+
+ var ops = [];
+ var directory = [];
+ var replaced = new Set();
+ var at = tdir.cdOffset;
+ var encoder = new TextEncoder();
+
+ for (var k = 0; k < incoming.length; k++) {
+  var src = incoming[k];
+  var rel = src.name.replace(/\\/g, '/');
+  var name = encoder.encode(prefix + rel);
+  var range = await entryRange(update, src);
+  var offset = at;
+  replaced.add(prefix + rel);
+  ops.push({ pos: offset, data: zipLocalHeader(name, src.crc, src.usize) });
+  ops.push({ pos: offset + 30 + name.length, data: update.slice(range.start, range.end) });
+  at += 30 + name.length + src.usize;
+  directory.push(zipCentralRecord(name, src.crc, src.usize, offset));
+ }
+
+ var kept = 0;
+ var dropped = 0;
+ for (var j = 0; j < told.length; j++) {
+  var oldName = told[j].name.replace(/\\/g, '/');
+  if (replaced.has(oldName) || gone.has(oldName)) { dropped++; continue; }
+  directory.push(told[j].raw);
+  kept++;
+ }
+
+ var count = kept + incoming.length;
+
+ var total = 0;
+ for (var d = 0; d < directory.length; d++) total += directory[d].length;
+ var cd = new Uint8Array(total);
+ var cursor = 0;
+ for (var e = 0; e < directory.length; e++) { cd.set(directory[e], cursor); cursor += directory[e].length; }
+
+ var ending = zipEnding(count, cd.length, at);
+ ops.push({ pos: at, data: cd });
+ for (var p = 0; p < ending.parts.length; p++) ops.push(ending.parts[p]);
+
+ return {
+  ops: ops,
+  size: at + cd.length + ending.size,
+  added: incoming.length,
+  dropped: dropped,
+  kept: kept
+ };
+}
+
+async function patchZipFile(handle, update, prefix) {
+ var target = await handle.getFile();
+ var plan = await planZipPatch(target, update, prefix);
+ var out = await handle.createWritable({ keepExistingData: true });
+ try {
+  await out.truncate(plan.size);
+  for (var i = 0; i < plan.ops.length; i++) {
+   await out.write({ type: 'write', position: plan.ops[i].pos, data: plan.ops[i].data });
+  }
+  await out.close();
+ } catch (err) {
+  try { await out.abort(); } catch (e) { /* ignore */ }
+  throw err;
+ }
+ return plan;
+}
+
+/* ---- applying a delta to a folder --------------------------------- */
+
+async function applyToFolder(root, update, known) {
+ var dir = await zipDir(update);
+ var entries = await zipEntries(update, dir);
+ var total = 0;
+ var i;
+ for (i = 0; i < entries.length; i++) total += entries[i].usize;
+ setUpdateProgress(0, total);
+
+ var dirs = new Map();
+ async function dirFor(key) {
+  if (!key) return root;
+  var hit = dirs.get(key);
+  if (hit) return hit;
+  var cut = key.lastIndexOf('/');
+  var parent = await dirFor(cut < 0 ? '' : key.slice(0, cut));
+  var made = await parent.getDirectoryHandle(cut < 0 ? key : key.slice(cut + 1), { create: true });
+  dirs.set(key, made);
+  return made;
+ }
+
+ var removedText = null;
+ var done = 0;
+ for (i = 0; i < entries.length; i++) {
+  var entry = entries[i];
+  var name = entry.name.replace(/\\/g, '/');
+  if (!name || name.charAt(name.length - 1) === '/') continue;
+  var range = await entryRange(update, entry);
+  if (name === 'Gams-removed-files.txt') {
+   removedText = await update.slice(range.start, range.end).text();
+   continue;
+  }
+  if (entry.method !== 0) throw new Error('This update is compressed and cannot be applied in place.');
+  setStatus('Writing ' + name + '\u2026');
+  var cut = name.lastIndexOf('/');
+  var folder = await dirFor(cut < 0 ? '' : name.slice(0, cut));
+  var fileHandle = await folder.getFileHandle(cut < 0 ? name : name.slice(cut + 1), { create: true });
+  var out = await fileHandle.createWritable();
+  try {
+   await out.write(update.slice(range.start, range.end));
+   await out.close();
+  } catch (err) {
+   try { await out.abort(); } catch (e) { /* ignore */ }
+   throw err;
+  }
+  done += entry.usize;
+  setUpdateProgress(done, total);
+ }
+
+ /* Only paths this copy actually had are deleted: the note is prose plus a
+    list, and nothing outside the listing should be touched. */
+ var have = new Set(known || []);
+ var gone = removalList(removedText);
+ var deleted = 0;
+ for (i = 0; i < gone.length; i++) {
+  var rel = gone[i];
+  if (!have.has(rel)) continue;
+  var at = rel.lastIndexOf('/');
+  var top = (at < 0 ? rel : rel.slice(0, at)).split('/')[0];
+  /* Only the site's own folders are cleaned up here. Anything else someone
+     keeps next to Gams.html is none of the updater's business. */
+  if (['g', 'img', 'm', 'r', 'assets'].indexOf(top) === -1 &&
+      ['Gams.html', 'Music.html', 'Settings.html', 'sw.js'].indexOf(rel) === -1) continue;
+  try {
+   var parent = await dirFor(at < 0 ? '' : rel.slice(0, at));
+   await parent.removeEntry(at < 0 ? rel : rel.slice(at + 1));
+   deleted++;
+  } catch (e) { /* already gone */ }
+ }
+ return { written: entries.length, deleted: deleted };
+}
+
+/* ---- talking to the server ---------------------------------------- */
+
+function requestUpdate(listing) {
+ var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+ if (listing) {
+  var json = JSON.stringify({ v: 2, folder: 1, files: listing });
+  /* The tag is assembled from pieces on purpose: the server strips anything
+     that reads like a real gams-files block, and this source is on the page
+     it serves. */
+  var open = '<scr' + 'ipt id="gams-files" type="application/json">';
+  var close = '</scr' + 'ipt>';
+  var at = html.indexOf(open);
+  if (at !== -1) {
+   var end = html.indexOf(close, at);
+   if (end !== -1) html = html.slice(0, at) + open + json + close + html.slice(end + close.length);
+  } else {
+   var cut = html.lastIndexOf('</body>');
+   if (cut !== -1) html = html.slice(0, cut) + open + json + close + html.slice(cut);
+   else html += open + json + close;
+  }
+ }
+ return fetch(UPDATE_SERVER + '/api/update', {
+  method: 'POST',
+  mode: 'cors',
+  cache: 'no-store',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: html
+ });
+}
+
+async function readUpdate(res) {
+ if (res.status === 409) return { tooOld: true };
+ if (!res.ok) throw new Error('The server could not build the update (' + res.status + ').');
+ var type = (res.headers.get('Content-Type') || '').toLowerCase();
+ if (type.indexOf('application/json') !== -1) {
+  var data = null;
+  try { data = await res.json(); } catch (e) { /* ignore */ }
+  if (data && data.changed === false) return { changed: false };
+  throw new Error('The server did not send an update.');
+ }
+ return { changed: true, blob: await res.blob() };
+}
+
+function downloadBlob(blob, filename) {
+ var url = URL.createObjectURL(blob);
+ var link = document.createElement('a');
+ link.href = url;
+ link.download = filename || ('gams-update-' + clientVersion + '.zip');
+ document.body.appendChild(link);
+ link.click();
+ link.remove();
+ setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+}
+
+function downloadPending() {
+ if (pendingUpdate) {
+  downloadBlob(pendingUpdate, 'gams-update-' + clientVersion + '.zip');
+  updateReady = false;
+  closeUpdateCard();
+  flashVersion('Update downloaded');
+  return;
+ }
+ /* Nothing was fetched while checking (the badge already knew there was an
+    update), so ask for the page-sized delta now. */
+ updating = true;
+ setStatus('Preparing the zip\u2026');
+ updateButtons([]);
+ setUpdateProgress(0, 0);
+ requestUpdate(null).then(function (res) {
+  return readUpdate(res);
+ }).then(function (out) {
+  stopBusy();
+  if (out.tooOld) {
+   showUpdateCard(false);
+   showTooOld(true);
+   return;
+  }
+  if (!out.changed) {
+   updateReady = false;
+   showUpdateCard(false);
+   flashVersion('No new versions available', 6000);
+   return;
+  }
+  downloadBlob(out.blob, 'gams-update-' + clientVersion + '.zip');
+  updateReady = false;
+  closeUpdateCard();
+  flashVersion('Update downloaded');
+ }).catch(function (err) {
+  stopBusy();
+  reportFailure(err);
+ });
+}
+
+/* ---- the card ----------------------------------------------------- */
+
+function openCard(target) {
+ showUpdateCard(true);
+ setUpdateProgress(0, 0);
+ idleBadge();
+ if (target) {
+  setStatus('\u201c' + target.handle.name + '\u201d is remembered from last time. Allow this page to change it again:');
+  updateButtons([
+   { label: 'Allow and update', primary: true, run: function () { updateInPlace(target); } },
+   { label: 'Use another copy', run: function () { openCard(null); } },
+   { label: 'Close', run: closeUpdateCard }
+  ]);
+  return;
+ }
+ setStatus('Choose where this copy lives. Only the newest files are written into it \u2014 nothing is downloaded twice.');
+ var items = [];
+ var canFolder = !!window.showDirectoryPicker;
+ var canZip = !!window.showOpenFilePicker;
+ if (canFolder) items.push({ label: 'Update my folder', primary: true, run: pickFolder });
+ if (canZip) items.push({ label: canFolder ? 'Patch a .zip' : 'Patch my .zip', primary: !canFolder, run: pickZip });
+ if (pendingUpdate) items.push({ label: 'Download zip', run: downloadPending });
+ items.push({ label: 'Close', run: closeUpdateCard });
+ updateButtons(items);
+}
+
+function reportFailure(err) {
+ try { console.error(err); } catch (e) { /* ignore */ }
+ var message = (err && err.message) || 'Something went wrong.';
+ if (updateCard && updateCard.style.display === 'flex') {
+  setStatus(message, true);
+  updateButtons([
+   { label: 'Use another copy', run: function () { openCard(null); } },
+   { label: 'Close', run: closeUpdateCard }
+  ]);
+  return;
+ }
+ if (isOffline()) flashVersion("Can't download new versions offline", 6000, true);
+ else flashVersion(message.length > 60 ? 'Could not update' : message, 8000, true);
+}
+
+async function checkOnly() {
+ setVersionBox('Checking\u2026', true);
+ if (versionBox) versionBox.classList.add('busy');
+ var out = await readUpdate(await requestUpdate(null));
+ if (out.tooOld) {
+  stopBusy();
+  showTooOld(true);
+  setVersionBox(updateReady ? 'Click here to update' : versionBase, updateReady);
+  return;
+ }
+ if (!out.changed) {
+  updateReady = false;
+  stopBusy();
+  flashVersion('No new versions available', 6000);
+  return;
+ }
+ pendingUpdate = out.blob;
+ stopBusy();
+ openCard(null);
+}
+
+async function pickFolder() {
+ if (!window.showDirectoryPicker) return;
+ try {
+  var root = await window.showDirectoryPicker({ mode: 'readwrite', id: 'gams-root' });
+  updStore('put', 'root', root);
+  updStore('put', 'last', 'root');
+  await updateInPlace({ handle: root, kind: 'folder' });
+ } catch (err) {
+  if (err && err.name === 'AbortError') return;
+  setStatus((err && err.message) || 'Could not open that folder.', true);
+ }
+}
+
+async function pickZip() {
+ if (!window.showOpenFilePicker) return;
+ try {
+  var picked = await window.showOpenFilePicker({
+   id: 'gams-zip',
+   multiple: false,
+   types: [{ description: 'Gams zip', accept: { 'application/zip': ['.zip'] } }]
+  });
+  var handle = picked && picked[0];
+  if (!handle) return;
+  if (handle.requestPermission) {
+   var state = await handle.requestPermission({ mode: 'readwrite' });
+   if (state !== 'granted') {
+    setStatus('This page is not allowed to change that zip.', true);
+    return;
+   }
+  }
+  updStore('put', 'zip', handle);
+  updStore('put', 'last', 'zip');
+  await updateInPlace({ handle: handle, kind: 'zip' });
+ } catch (err) {
+  if (err && err.name === 'AbortError') return;
+  if (err && err.name === 'SecurityError') {
+   setStatus('This page is not allowed to open files. Open Gams.html from your own copy and try again.', true);
+   return;
+  }
+  setStatus((err && err.message) || 'Could not open that zip.', true);
+ }
+}
+
+async function updateInPlace(target) {
+ updating = true;
+ showUpdateCard(true);
+ updateButtons([]);
+ setUpdateProgress(0, 0);
+
+ try {
+  var state = await targetPermission(target, true);
+  if (state !== 'granted') {
+   setStatus('This page is not allowed to change \u201c' + target.handle.name + '\u201d. Click again to allow it.', true);
+   updateButtons([
+    { label: 'Try again', primary: true, run: function () { updateInPlace(target); } },
+    { label: 'Close', run: closeUpdateCard }
+   ]);
+   stopBusy();
+   return;
+  }
+
+  var listing = null;
+  var prefix = '';
+  var file = null;
+
+  setStatus('Reading \u201c' + target.handle.name + '\u201d\u2026');
+  if (target.kind === 'folder') {
+   listing = await folderListing(target.handle);
+   var hasPage = false;
+   for (var i = 0; i < listing.length; i++) {
+    if (listing[i][0].toLowerCase() === 'gams.html') { hasPage = true; break; }
+   }
+   if (!hasPage) {
+    setStatus('That folder has no Gams.html. Pick the folder that holds the game copy.', true);
+    openCardAgain(target);
+    return;
+   }
+  } else {
+   file = await target.handle.getFile();
+   var zip = await zipListing(file);
+   if (!zip.hasPage) {
+    setStatus('That zip has no Gams.html, so it does not look like a Gams copy.', true);
+    openCardAgain(target);
+    return;
+   }
+   listing = zip.files;
+   prefix = zip.prefix;
+  }
+
+  setStatus('Comparing with the server\u2026');
+  var out = await readUpdate(await requestUpdate(listing));
+  if (out.tooOld) {
+   showUpdateCard(false);
+   showTooOld(true);
+   stopBusy();
+   return;
+  }
+  if (!out.changed) {
+   updateReady = false;
+   showUpdateCard(false);
+   stopBusy();
+   flashVersion('No new versions available', 6000);
+   return;
+  }
+
+  if (target.kind === 'folder') {
+   await applyToFolder(target.handle, out.blob, listing);
+   setStatus('Done. Reloading\u2026');
+   stopBusy();
+   setTimeout(function () { location.reload(); }, 800);
+   return;
+  }
+
+  setStatus('Writing into \u201c' + target.handle.name + '\u201d\u2026');
+  var plan = await patchZipFile(target.handle, out.blob, prefix);
+  updateReady = false;
+  setStatus('Done. ' + plan.added + ' file' + (plan.added === 1 ? '' : 's') +
+   ' written into ' + target.handle.name +
+   (plan.dropped ? ', ' + plan.dropped + ' old entr' + (plan.dropped === 1 ? 'y' : 'ies') + ' replaced' : '') + '.');
+  updateButtons([{ label: 'Close', primary: true, run: closeUpdateCard }]);
+  stopBusy();
+ } catch (err) {
+  stopBusy();
+  reportFailure(err);
+ }
+}
+
+function openCardAgain(target) {
+ updateButtons([
+  { label: 'Try again', primary: true, run: function () { updateInPlace(target); } },
+  { label: 'Use another copy', run: function () { openCard(null); } },
+  { label: 'Close', run: closeUpdateCard }
+ ]);
+}
+
+/* The click always asks the server, even when the box looks grey: that is how
+   an up-to-date copy can answer "No new versions available" instead of
+   guessing. A remembered folder or zip is updated in place in one click. */
+async function runUpdate() {
+ if (updating) return;
+ if (isOffline()) {
+  flashVersion("Can't download new versions offline", 6000, true);
+  return;
+ }
+ updating = true;
+ try {
+  var target = await savedTarget();
+  if (!target) {
+   /* Green already means the server announced a newer version, so the card
+      can open straight away instead of building a delta nobody asked for. */
+   if (updateReady) { openCard(null); stopBusy(); return; }
+   await checkOnly();
+   return;
+  }
+  var state = await targetPermission(target, false);
+  if (state === 'granted') { await updateInPlace(target); return; }
+  openCard(target);
+  stopBusy();
+ } catch (err) {
+  stopBusy();
+  reportFailure(err);
+ }
+}
+
+if (versionBox) {
+ versionBox.addEventListener('click', function () { runUpdate(); });
+}
+
+/* position: fixed holds the box still in normal browsers. A few embedded
+   viewers scroll a transformed wrapper and ignore it, so if the box is ever
+   seen away from the top, follow the scroll by hand. */
+(function keepVersionBoxAtTop() {
+ var dock = l('versionDock');
+ if (!dock || !versionBox) return;
+ var TOP = 60;
+ var manual = false;
+
+ function scrollTop() {
+  return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+ }
+
+ function pin() {
+  dock.style.position = 'absolute';
+  dock.style.top = '0';
+  dock.style.left = '0';
+  dock.style.right = '0';
+  dock.style.transform = 'translateY(' + scrollTop() + 'px)';
+ }
+
+ function follow() {
+  if (manual) { pin(); return; }
+  var top = versionBox.getBoundingClientRect().top;
+  if (top >= 40 && top <= 110) return;
+  manual = true;
+  pin();
+ }
+
+ window.addEventListener('scroll', follow, { passive: true });
+ window.addEventListener('resize', follow);
+})();
+var tooOldClose = l('tooOldClose');
+if (tooOldClose) {
+ tooOldClose.addEventListener('click', function () { showTooOld(false); });
+}
+
+/* These tiles are deliberately not real links: Chrome draws the destination
+   in the status bar while the pointer is over a link, and that address is the
+   tunnel. Keyboard and mouse both still work. */
+function linkLike(el, url) {
+ if (!el || !url) return;
+ function go(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  location.href = url;
+ }
+ el.addEventListener('click', go);
+ el.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter' || event.key === ' ' || event.keyCode === 13 || event.keyCode === 32) go(event);
+ });
+}
+Array.prototype.forEach.call(document.querySelectorAll('[data-go]'), function (el) {
+ linkLike(el, el.getAttribute('data-go'));
+});
+
+/* A bare about:blank tab shows no name and no icon, so give the game's own
+   ones to the tab before drawing the game into it. */
+function absoluteIcon(value) {
+ if (!value) return '';
+ try { return new URL(value, location.href).href; } catch (e) { return value; }
+}
+
+function openBlankGame(wrapper, title, icon) {
+ var w = window.open();
+ if (!w) return false;
+
+ var doc = w.document;
+ doc.title = title || 'Gams';
+
+ try { doc.body.style.cssText = 'margin:0;overflow:hidden;background:#000'; } catch (e) {}
+
+ var head = doc.head;
+ if (head) {
+  var old = head.querySelectorAll('link[rel*="icon"]');
+  for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+  var link = doc.createElement('link');
+  link.rel = 'icon';
+  link.type = 'image/png';
+  link.href = absoluteIcon(icon) || absoluteIcon('img/gams-g.png');
+  head.appendChild(link);
+ }
+
+ var frame = doc.createElement('iframe');
+ frame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:0';
+ frame.setAttribute('frameborder', '0');
+ frame.src = wrapper;
+ doc.body.appendChild(frame);
+ return true;
+}
+
+/* ---- the overlay ("On this tab") -------------------------------------
+   The game always runs inside g/g/Gam.html, full screen, so the wrapper's
+   Save / Fullscreen / Settings menu is available. Gam.html is same-origin,
+   so its "back to home" arrow can close the overlay instead of loading the
+   menu inside it. */
+/* ---- game loading progress ---- */
+var gameLoad = { pct: 0, target: 0, cap: 78, timer: null, fallback: null };
+
+function paintGameLoad(value) {
+ gameLoad.pct = Math.max(gameLoad.pct, Math.min(100, Number(value) || 0));
+ l('loaderFill').style.width = gameLoad.pct.toFixed(1) + '%';
+ l('loaderPct').textContent = Math.round(gameLoad.pct) + '%';
+}
+
+function startGameLoad(title) {
+ stopGameLoad();
+ gameLoad.pct = 0;
+ gameLoad.target = 10;
+ gameLoad.cap = 78;
+ l('loaderTitle').textContent = 'Loading ' + (title || 'game') + '\u2026';
+ l('loaderStep').textContent = 'Opening the game\u2026';
+ l('loaderFill').style.width = '0%';
+ l('loaderPct').textContent = '0%';
+ gameLoad.timer = setInterval(function () {
+  if (gameLoad.pct < gameLoad.target) paintGameLoad(Math.min(gameLoad.target, gameLoad.pct + 2));
+  else if (gameLoad.pct < gameLoad.cap) paintGameLoad(gameLoad.pct + 0.5);
+ }, 260);
+}
+
+function setGameLoadStage(pct, label, cap) {
+ gameLoad.target = Math.min(100, Number(pct) || 0);
+ if (typeof cap === 'number') gameLoad.cap = cap;
+ if (label) l('loaderStep').textContent = label;
+ if (gameLoad.pct > gameLoad.target) paintGameLoad(gameLoad.target);
+}
+
+function stopGameLoad() {
+ if (gameLoad.timer) { clearInterval(gameLoad.timer); gameLoad.timer = null; }
+ if (gameLoad.fallback) { clearTimeout(gameLoad.fallback); gameLoad.fallback = null; }
+}
+
+function finishGameLoad() {
+ if (!gameLoad.timer) return;
+ stopGameLoad();
+ paintGameLoad(100);
+ l('loaderStep').textContent = 'Ready';
+ setTimeout(function () {
+  if (gameLoad.pct >= 100) l('loader').style.display = 'none';
+ }, 200);
+}
+
+function closeOverlay() {
+ var f = l('mainGam');
+ stopGameLoad();
+ l('overlay').style.display = 'none';
+ l('loader').style.display = 'none';
+ f.onload = null;
+ try { f.src = 'about:blank'; } catch (e) {}
+}
+
+function wireOverlayFrame(f) {
+ var doc;
+ try { doc = f.contentDocument; } catch (e) { return; }
+ if (!doc) return;
+ var back = doc.getElementById('backHome');
+ if (back) {
+  back.onclick = function (event) {
+   if (event) event.preventDefault();
+   closeOverlay();
+   return false;
+  };
+ }
+ if (!doc.__gamsEsc) {
+  doc.__gamsEsc = true;
+  doc.addEventListener('keydown', function (event) {
+   if (event.key === 'Escape' || event.keyCode === 27) closeOverlay();
+  });
+ }
+}
+
+function openInOverlay(wrapper, title) {
+ var f = l('mainGam');
+ l('overlay').style.display = 'block';
+ l('loader').style.display = 'flex';
+ startGameLoad(title);
+ f.onload = function () {
+  setGameLoadStage(88, 'Starting the game\u2026', 99);
+  wireOverlayFrame(f);
+  try { f.contentWindow.focus(); } catch (e) {}
+  /* The wrapper normally posts gams-ready as soon as the game frame loads.
+     If a game never does, do not leave the bar on screen forever. */
+  gameLoad.fallback = setTimeout(finishGameLoad, 25000);
+ };
+ f.src = wrapper;
+ try { f.focus(); } catch (e) {}
+}
+
+window.addEventListener('keydown', function (event) {
+ if ((event.key === 'Escape' || event.keyCode === 27) && l('overlay').style.display === 'block') closeOverlay();
+});
+
+/* The game wrapper asks to be closed (its back arrow or Escape) so that works
+   even when this page cannot read into the frame, as with file:// pages. */
+window.addEventListener('message', function (event) {
+ var data = event.data;
+ if (!data || typeof data !== 'object') return;
+ if (event.source !== l('mainGam').contentWindow) return;
+ if (data.type === 'gams-close') {
+  if (l('overlay').style.display === 'block') closeOverlay();
+  return;
+ }
+ if (data.type === 'gams-ready') {
+  finishGameLoad();
+  return;
+ }
+});
+
+
+/* ================================================================== */
+
+var mode = 'embed'; //gam, embed, blank, direct, raw
+//Init
+var gams = document.getElementsByClassName("tile");
+for (i = 0; i < gams.length; i++){
+gams[i].onclick = function(e){
+if (this.parentNode && this.parentNode.id === 'contain') return; // Settings / About / Music
+if (!this.getElementsByClassName("href").length) return;
+var href = (this.getElementsByClassName("href")[0].href);
+var name = (this.getElementsByClassName("name")[0].innerText);
+var modeX = (this.getElementsByClassName("modeX")[0].innerText);
+var pic = (this.getElementsByClassName("img")[0].src);
+var wrapper = 'g/g/Gam.html?icon=' + encodeURIComponent(pic) + '&name=' + encodeURIComponent(name) + '&src=' + encodeURIComponent(href);
+
+mode = getStoredJSON('gams', {key: 'gamMode'});
+
+if (GAM_MODES.indexOf(mode) === -1) mode = 'embed';
+
+if (modeX == "raw") {mode = modeX}   // a few tiles always open their own page
+
+if (mode == 'raw') {
+window.open(href);
+return;
+}
+
+if (mode == 'direct') {
+window.location = wrapper;
+return;
+}
+
+if (mode == 'blank') {
+openBlankGame(wrapper, name, pic);
+return;
+}
+
+if (mode == 'gam') {
+window.open(wrapper);
+return;
+}
+
+if (mode == 'embed') {
+openInOverlay(wrapper, name);
+}
+
+}
+}
+//Init
+
+function setFavicon(href) {
+var existFav = document.querySelectorAll('link[rel*="icon"]');
+existFav.forEach(function(favicon) {
+favicon.parentNode.removeChild(favicon);
+});
+
+var link = document.createElement('link');
+link.type = 'image/x-icon';
+link.rel = 'icon';
+link.href = href;
+document.getElementsByTagName('head')[0].appendChild(link);
+}
+
+const ogTitle = document.title;
+const ogIcon = document.querySelectorAll('link[rel*="icon"]')[0].href;
+
+function applyDisguise() {
+var icon = getStoredJSON('gams', {key: 'icon'});
+var title = getStoredJSON('gams', {key: 'title'});
+if (title) {
+document.title = (title);
+}else{
+document.title = (ogTitle);
+}
+
+if (icon) {
+setFavicon(icon)
+}else{
+setFavicon(ogIcon)
+}
+
+// If this page runs inside the shareable shell, the browser tab belongs to
+// the shell, so tell it which title/icon to show.
+try {
+if (window.top !== window.self) {
+window.top.postMessage({ gamsDisguise: {
+title: title || '',
+icon: icon ? document.querySelector('link[rel*="icon"]').href : ''
+} }, '*');
+}
+} catch (e) {}
+}
+
+applyDisguise();
+
+BroadcastDisguise.onmessage = () => {
+applyDisguise();
+};
+</script>
+<script src="m/musica.js"></script>
+</body>
+</html>

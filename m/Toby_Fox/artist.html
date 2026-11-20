@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .artist-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        .track-container {
+            background-color: #181818;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .track-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background-color: #202020;
+            transition: background 0.2s;
+        }
+        .track-row:hover {
+            background-color: #282828;
+        }
+        .track-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .track-cover {
+            width: 55px;
+            height: 55px;
+            border-radius: 4px;
+            object-fit: cover;
+            background-color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .track-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+        .play-trigger-btn {
+            background-color: #1db954;
+            border: none;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .play-trigger-btn:hover {
+            transform: scale(1.05);
+        }
+        .track-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: none;
+        }
+        .add-pl-btn {
+            background-color: transparent;
+            border: 2px solid #535353;
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .add-pl-btn:hover {
+            border-color: #1db954;
+            transform: scale(1.05);
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: #1db954;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a data-go="../../Music.html" class="back-btn" role="link" tabindex="0" style="cursor:pointer">&larr; Back to Catalog</a>
+
+    <div class="header">
+        <img id="artistProfileImg" src="" alt="Artist Profile" class="artist-img">
+        <div>
+            <h1 id="artistTitleName" style="margin:0 0 5px 0;">Artist</h1>
+            <p style="color: #b3b3b3; margin:0;">Tracks & Discography</p>
+        </div>
+    </div>
+
+    <div class="track-container">
+        <div id="trackList"></div>
+    </div>
+
+    <script src="../musica.js"></script>
+    <script src="../playlist-engine.js"></script>
+    <script>
+        // =========================================================================
+        // TRACK CONFIGURATION  -  edit this per artist folder
+        // =========================================================================
+        const trackConfig = {
+            artistName: "Toby Fox",
+            folder: "Toby_Fox",
+            profileImage: "Toby_Fox.png",
+            tracks: [
+                { name: "sans.", href: "sans..ogg", img: "" },
+                { name: "Bonetrousle", href: "Bonetrousle.ogg", img: "" },
+                { name: "Spear Of Justice", href: "Spear_of_Justice.ogg", img: "" },
+                { name: "Metal Crusher", href: "Metal_Crusher.ogg", img: "" },
+                { name: "Spider Dance", href: "Spider_Dance.ogg", img: "" },
+                { name: "Death By Glamour", href: "Death_By_Glamour.ogg", img: "" },
+                { name: "MEGALOVANIA", href: "MEGALOVANIA.ogg", img: "" },
+                { name: "ASGORE", href: "ASGORE.ogg", img: "" },
+                { name: "Hopes And Dreams", href: "Hopes_And_Dreams.ogg", img: "" },
+                { name: "The World Revolving", href: "The_World_Revolving.ogg", img: "" },
+                { name: "BIG SHOT", href: "BIG_SHOT.ogg", img: "" },
+                { name: "Attack Of The Killer Queen", href: "Attack_Of_The_Killer_Queen.ogg", img: "" },
+                { name: "It's TV Time! ", href: "Its_TV_Time!.ogg", img: "" },
+                { name: "Hammer Of Justice ", href: "Hammer_of_Justice.ogg", img: "" },
+                { name: "Cutie Mew Mew Magic ", href: "Cutie_Mew_Mew_Magic.ogg", img: "" },
+                { name: "Flower Man ", href: "Flower_Man.ogg", img: "" },
+                { name: "Flower Man remix with lyrics ", href: "Flower_Man_(lyrics).ogg", img: "" },
+            ]
+        };
+
+        // Cover = track.img if given, otherwise <song file name>.png
+        function resolveCoverSource(track) {
+            if (track.img && track.img !== "") return track.img;
+            const dot = track.href.lastIndexOf('.');
+            const base = dot !== -1 ? track.href.substring(0, dot) : track.href;
+            return base + ".png";
+        }
+
+        function initLayout() {
+            document.getElementById('artistTitleName').textContent = trackConfig.artistName;
+            document.getElementById('artistProfileImg').src = trackConfig.profileImage;
+
+            const container = document.getElementById('trackList');
+            container.innerHTML = '';
+
+            trackConfig.tracks.forEach(track => {
+                const row = document.createElement('div');
+                row.className = 'track-row';
+
+                const meta = document.createElement('div');
+                meta.className = 'track-meta';
+
+                let cover = resolveCoverSource(track);
+                const thumb = document.createElement('img');
+                thumb.className = 'track-cover';
+                thumb.src = cover;
+                thumb.onerror = function () {          // no cover file? use the artist photo
+                    cover = trackConfig.profileImage;
+                    thumb.onerror = null;
+                    thumb.src = cover;
+                };
+
+                const label = document.createElement('span');
+                label.className = 'track-title';
+                label.textContent = track.name;
+
+                const btn = document.createElement('button');
+                btn.className = 'play-trigger-btn';
+                btn.textContent = "PLAY";
+                // Paths are from the ROOT Gams folder so every page understands them
+                const songInfo = () => ({
+                    src: "m/" + trackConfig.folder + "/" + track.href,
+                    title: track.name,
+                    artist: trackConfig.artistName,
+                    img: "m/" + trackConfig.folder + "/" + cover
+                });
+                btn.onclick = () => Musica.play(songInfo());
+
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-pl-btn';
+                addBtn.textContent = "Add to playlist";
+                addBtn.onclick = () => Playlists.openAddDialog(songInfo());
+
+                meta.appendChild(thumb);
+                meta.appendChild(label);
+                row.appendChild(meta);
+                const actions = document.createElement('div');
+                actions.className = 'track-actions';
+                actions.appendChild(addBtn);
+                actions.appendChild(btn);
+                row.appendChild(actions);
+                container.appendChild(row);
+            });
+        }
+
+        initLayout();
+    </script>
+<script>
+/* A real link shows its address in the status bar on hover, and that address
+   is the tunnel. Navigate from script instead. */
+(function () {
+    var link = document.querySelector('.back-btn');
+    if (!link) return;
+    function go(event) {
+        event.preventDefault();
+        location.href = link.getAttribute('data-go');
+    }
+    link.addEventListener('click', go);
+    link.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ' || event.keyCode === 13 || event.keyCode === 32) go(event);
+    });
+})();
+</script>
+</body>
+</html>
