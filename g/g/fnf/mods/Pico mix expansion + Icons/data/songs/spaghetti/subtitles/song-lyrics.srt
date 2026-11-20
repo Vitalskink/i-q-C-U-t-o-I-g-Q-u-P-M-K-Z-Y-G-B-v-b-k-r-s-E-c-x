@@ -1,0 +1,215 @@
+﻿1
+00:00:05,200 --> 00:00:08,600
+<font face="Noto Serif KR SemiBold"><font size="25px">This is a hot spot, 숨 쉬듯 찾는 네 밥상</font>
+
+2
+00:00:09,000 --> 00:00:13,450
+<font face="Noto Serif KR SemiBold"><font size="25px">단골이 된 넌 fall in love, 참을 수 없는 맛</font>
+
+3
+00:00:13,700 --> 00:00:17,200
+<font face="Noto Serif KR SemiBold"><font size="25px">우린 in the kitchen, cookin' it up, what you're craving?</font>
+
+4
+00:00:17,700 --> 00:00:22,100
+<font face="Noto Serif KR SemiBold"><font size="25px">나의 입맛대로 saucin' and now the world's gone mad</font>
+
+5
+00:00:22,570 --> 00:00:24,960
+<font face="Noto Serif KR SemiBold"><font size="25px">You don't need to think too much</font>
+
+6
+00:00:25,270 --> 00:00:29,110
+<font face="Noto Serif KR SemiBold"><font size="25px">씹고 뜯고 맛보고 즐기다 가면 돼</font>
+
+7
+00:00:29,290 --> 00:00:30,140
+<font face="Noto Serif KR SemiBold"><font size="25px">(Yeah, yeah, yeah!)</font>
+
+8
+00:00:30,630 --> 00:00:33,640
+<font face="Noto Serif KR SemiBold"><font size="25px">깊이 스며들어 in your mouth</font>
+
+9
+00:00:33,860 --> 00:00:38,050
+<font face="Noto Serif KR SemiBold"><font size="25px">Guilty pleasure never killed nobody, 드셔봐</font>
+
+10
+00:00:39,250 --> 00:00:43,450
+<font face="Noto Serif KR SemiBold"><font size="25px">이빨 사이 낀 spaghetti 빼고 싶니? Bon appétit</font>
+
+11
+00:00:43,530 --> 00:00:47,320
+<font face="Noto Serif KR SemiBold"><font size="25px">그냥 포기해 어차피, eat it up, eat it, eat it up</font>
+
+12
+00:00:47,870 --> 00:00:52,110
+<font face="Noto Serif KR SemiBold"><font size="25px">머릿속 낀 SSERAFIM, bad dish in between your teeth</font>
+
+13
+00:00:52,160 --> 00:00:55,910
+<font face="Noto Serif KR SemiBold"><font size="25px">그냥 포기해 어차피, eat it up, eat it, eat it up</font>
+
+14
+00:00:55,920 --> 00:00:58,000
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it (Whoa.)</font>
+
+15
+00:00:58,100 --> 00:01:00,150
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it up (Hey!)</font>
+
+16
+00:01:00,240 --> 00:01:02,380
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it</font>
+
+17
+00:01:02,670 --> 00:01:04,560
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it up</font>
+
+18
+00:01:04,820 --> 00:01:06,700
+<font face="Noto Serif KR SemiBold"><font size="25px">Yeah, this is the sweet spot</font>
+
+19
+00:01:06,960 --> 00:01:08,860
+<font face="Noto Serif KR SemiBold"><font size="25px">Heat up the scene, it's that big shot</font>
+
+20
+00:01:09,000 --> 00:01:10,900
+<font face="Noto Serif KR SemiBold"><font size="25px">Chef's choice, 널 위한 킥이야</font>
+
+21
+00:01:10,910 --> 00:01:12,780
+<font face="Noto Serif KR SemiBold"><font size="25px">You lost in the sauce? No turnin' back</font>
+
+22
+00:01:12,880 --> 00:01:15,030
+<font face="Noto Serif KR SemiBold"><font size="25px">더 취할 거야 밤새, 기울여 절로</font>
+
+23
+00:01:15,050 --> 00:01:17,240
+<font face="Noto Serif KR SemiBold"><font size="25px">난 빈 잔은 받고, 이젠 핀잔은 걸러</font>
+
+24
+00:01:17,480 --> 00:01:18,330
+<font face="Noto Serif KR SemiBold"><font size="25px">좋은 게 좋은 거지, 좋다는 게 왜 뭐?</font>
+
+25
+00:01:19,350 --> 00:01:22,110
+<font face="Noto Serif KR SemiBold"><font size="25px">느껴봐 어서, 꺾지 말고 벌컥 (ah)</font>
+
+26
+00:01:22,220 --> 00:01:23,780
+<font face="Noto Serif KR SemiBold"><font size="25px">Snap it up, like a Getty</font>
+
+27
+00:01:23,790 --> 00:01:26,300
+<font face="Noto Serif KR SemiBold"><font size="25px">내 김치 포즈는 여전히 priceless</font>
+
+28
+00:01:26,440 --> 00:01:28,080
+<font face="Noto Serif KR SemiBold"><font size="25px">Whatever I'm cookin', star 같이</font>
+
+29
+00:01:28,090 --> 00:01:30,420
+<font face="Noto Serif KR SemiBold"><font size="25px">어떤 코스든 원하면, 말아주는 쉐키</font>
+
+30
+00:01:30,620 --> 00:01:32,530
+<font face="Noto Serif KR SemiBold"><font size="25px">내가 네 취향, 드라마 주인공이고</font>
+
+31
+00:01:32,580 --> 00:01:34,700
+<font face="Noto Serif KR SemiBold"><font size="25px">또 숨듣명이고, 고칼로리 Hershey 초코</font>
+
+32
+00:01:34,900 --> 00:01:37,660
+<font face="Noto Serif KR SemiBold"><font size="25px">모든 줏대를 홀리는 타로, 넌 음미해 나로</font>
+
+33
+00:01:37,670 --> 00:01:39,290
+<font face="Noto Serif KR SemiBold"><font size="25px">자, 이제 까에서 빠로, brr</font>
+
+34
+00:01:39,740 --> 00:01:43,320
+<font face="Noto Serif KR SemiBold"><font size="25px">Yeah, this is a hot spot, don't give a fork, 네가 뭐라던</font>
+
+35
+00:01:43,680 --> 00:01:48,130
+<font face="Noto Serif KR SemiBold"><font size="25px">씹어보셔, 맛이 좋아, 필요 없어 three star</font>
+
+36
+00:01:48,410 --> 00:01:52,000
+<font face="Noto Serif KR SemiBold"><font size="25px">Yeah, 말로만 hate it, 어디 갔어 너의 diet?</font>
+
+37
+00:01:52,190 --> 00:01:56,730
+<font face="Noto Serif KR SemiBold"><font size="25px">남몰래 쓱 하는 음미, you better stop lying</font>
+
+38
+00:01:57,250 --> 00:01:59,830
+<font face="Noto Serif KR SemiBold"><font size="25px">Don't care what you talk about</font>
+
+39
+00:02:00,000 --> 00:02:03,810
+<font face="Noto Serif KR SemiBold"><font size="25px">오늘도 제 발로 달려온 건 너잖아</font>
+
+40
+00:02:03,990 --> 00:02:04,870
+<font face="Noto Serif KR SemiBold"><font size="25px">(Yeah, yeah, yeah!)</font>
+
+41
+00:02:05,350 --> 00:02:08,340
+<font face="Noto Serif KR SemiBold"><font size="25px">깊이 스며들어 in your mouth</font>
+
+42
+00:02:08,550 --> 00:02:12,740
+<font face="Noto Serif KR SemiBold"><font size="25px">진짜 사랑인지 아닌지 곱씹어 봐</font>
+
+43
+00:02:13,960 --> 00:02:18,250
+<font face="Noto Serif KR SemiBold"><font size="25px">이빨 사이 낀 spaghetti 빼고 싶니? Bon appétit</font>
+
+44
+00:02:18,280 --> 00:02:22,070
+<font face="Noto Serif KR SemiBold"><font size="25px">그냥 포기해 어차피, eat it up, eat it, eat it up</font>
+
+45
+00:02:22,570 --> 00:02:26,820
+<font face="Noto Serif KR SemiBold"><font size="25px">머릿속 낀 SSERAFIM, bad dish in between your teeth</font>
+
+46
+00:02:26,880 --> 00:02:30,570
+<font face="Noto Serif KR SemiBold"><font size="25px">그냥 포기해 어차피, eat it up, eat it, eat it up</font>
+
+47
+00:02:30,660 --> 00:02:32,740
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it (Woah.)</font>
+
+48
+00:02:32,790 --> 00:02:34,890
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it up (Hey!)</font>
+
+49
+00:02:34,940 --> 00:02:37,020
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it (Whoa.)</font>
+
+50
+00:02:37,340 --> 00:02:39,170
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it up</font>
+
+51
+00:02:39,260 --> 00:02:41,370
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it (Whoa.)</font>
+
+52
+00:02:41,410 --> 00:02:43,420
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it up (Hey!)</font>
+
+53
+00:02:43,570 --> 00:02:45,670
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it (Whoa.)</font>
+
+54
+00:02:45,950 --> 00:02:47,330
+<font face="Noto Serif KR SemiBold"><font size="25px">Eat it up, eat it, eat it up</font>

@@ -1,0 +1,62 @@
+{
+  "version": "2.2.4",
+  "songName": "Thorns (Pico Mix)",
+  "artist": "nasadotexe",
+  "charter": "28rindos",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "easy",
+      "normal",
+      "hard"
+    ],
+    "characters": {
+      "player": "pico-pixel",
+      "girlfriend": "nene-pixel",
+      "opponent": "spirit",
+      "instrumental": "pico",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "spirit"
+      ],
+      "playerVocals": [
+        "pico-pixel"
+      ]
+    },
+    "stage": "schoolEvilPico",
+    "noteStyle": "pixel",
+    "ratings": {
+      "easy": 3,
+      "hard": 5,
+      "normal": 4
+    },
+    "album": "expansionP",
+    "previewStart": 0,
+    "previewEnd": 0
+  },
+  "generatedBy": "Friday Night Funkin' - v0.7.3",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 190,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

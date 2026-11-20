@@ -1,0 +1,130 @@
+{
+	"danceEvery": 1,
+	"offsets": [
+		0,
+		0
+	],
+	"renderType": "multisparrow",
+	"version": "1.0.1",
+	"scale": 7,
+	"name": "bf pixel opp",
+	"flipX": true,
+	"flipY": false,
+	"startingAnimation": "idle",
+	"death": {
+		"cameraOffsets": [
+			0,
+			0
+		]
+	},
+	"singTime": 8,
+	"isPixel": true,
+	"assetPath": "characters/bfPixel",
+	"healthIcon": {
+		"isPixel": true,
+		"id": "bf-pixel"
+	},
+	"generatedBy": "Nova Character Editor v0.1.3",
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF IDLE instance 10",
+			"name": "idle"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF UP NOTE instance 10",
+			"name": "singUP"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF RIGHT NOTE instance 10",
+			"name": "singLEFT"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF LEFT NOTE instance 10",
+			"name": "singRIGHT"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF DOWN NOTE instance 10",
+			"name": "singDOWN"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF UP MISS instance 10",
+			"name": "singUPmiss"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF LEFT MISS instance 10",
+			"name": "singLEFTmiss"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF RIGHT MISS instance 10",
+			"name": "singRIGHTmiss"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"prefix": "BF DOWN MISS instance 10",
+			"name": "singDOWNmiss"
+		},
+		{
+			"offsets": [
+				8.33,
+				0
+			],
+			"prefix": "BF Dies pixel",
+			"assetPath": "characters/bfPixelsDEAD",
+			"name": "firstDeath"
+		},
+		{
+			"offsets": [
+				3.33,
+				-2.08
+			],
+			"assetPath": "characters/bfPixelsDEAD",
+			"prefix": "Retry Loop",
+			"name": "deathLoop",
+			"looped": true
+		},
+		{
+			"offsets": [
+				3.33,
+				-2.08
+			],
+			"prefix": "RETRY CONFIRM",
+			"assetPath": "characters/bfPixelsDEAD",
+			"name": "deathConfirm"
+		}
+	]
+}

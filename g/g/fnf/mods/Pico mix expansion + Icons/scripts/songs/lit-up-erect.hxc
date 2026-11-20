@@ -1,0 +1,20 @@
+import funkin.play.song.Song;
+import funkin.save.Save;
+
+class LitUpErectMixSong extends Song
+{
+  function new()
+  {
+    super('lit-up',
+      {
+        variation: 'erect'
+      });
+  }
+
+  public override function isSongNew(currentDifficulty:String, currentVariation:String):Bool
+  {
+    if (currentVariation == 'erect') return !Save.instance.hasBeatenSong(this.id, null, this.variation);
+
+    return false;
+  }
+}

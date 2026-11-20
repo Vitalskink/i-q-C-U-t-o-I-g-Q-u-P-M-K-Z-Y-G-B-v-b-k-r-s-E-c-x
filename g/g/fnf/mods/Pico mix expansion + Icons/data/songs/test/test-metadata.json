@@ -1,0 +1,64 @@
+{
+  "version": "2.2.4",
+  "songName": "Test",
+  "artist": "Kawaii Sprite, MtH",
+  "charter": "Psych Engine",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [
+      "pico"
+    ],
+    "difficulties": [
+      "easy",
+      "normal",
+      "hard"
+    ],
+    "characters": {
+      "player": "bf-default-remnants",
+      "girlfriend": "podium-girls",
+      "opponent": "bf-remnants-opponent",
+      "instrumental": "",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "bf-pixel-opp"
+      ],
+      "playerVocals": [
+        "bf"
+      ]
+    },
+    "stage": "sketchRemnants",
+    "noteStyle": "funkin",
+    "ratings": {
+      "easy": 5,
+      "normal": 5,
+      "hard": 5
+    },
+    "album": "volume2",
+    "previewStart": 0,
+    "previewEnd": 12500
+  },
+  "generatedBy": "Friday Night Funkin' - v0.7.5",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 150,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

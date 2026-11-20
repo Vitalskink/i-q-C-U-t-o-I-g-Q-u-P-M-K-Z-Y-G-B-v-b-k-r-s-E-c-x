@@ -1,0 +1,58 @@
+{
+  "version": "2.2.4",
+  "songName": "Tutorial (Bf Mix)",
+  "artist": "RixFx (Cover: keithez_29)",
+  "charter": "AnotherGamer",
+  "divisions": 96,
+  "looped": false,
+  "visible": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "hard"
+    ],
+    "characters": {
+      "player": "bf",
+      "opponent": "nene-opp",
+      "instrumental": "",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "nene-opp"
+      ],
+      "playerVocals": [
+        "bf"
+      ]
+    },
+    "stage": "mainStagePico",
+    "noteStyle": "funkin",
+    "ratings": {
+      "hard": 4
+    },
+    "album": "expansionP",
+    "previewStart": 0,
+    "previewEnd": 0
+  },
+  "generatedBy": "Friday Night Funkin' - v0.7.5",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 110,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

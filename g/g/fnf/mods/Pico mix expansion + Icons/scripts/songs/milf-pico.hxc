@@ -1,0 +1,20 @@
+import funkin.play.song.Song;
+import funkin.save.Save;
+
+class MilfPicoMixSong extends Song
+{
+  function new()
+  {
+    super('milf',
+      {
+        variation: 'pico'
+      });
+  }
+
+  public override function isSongNew(currentDifficulty:String, currentVariation:String):Bool
+  {
+    if (currentVariation == 'pico') return !Save.instance.hasBeatenSong(this.id, null, this.variation);
+
+    return false;
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "version": "2.2.4",
+  "songName": "Lit Up Erect",
+  "artist": "Abby",
+  "charter": "Abby",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "erect",
+      "nightmare"
+    ],
+    "characters": {
+      "player": "pico-playable",
+      "girlfriend": "nene",
+      "opponent": "darnell",
+      "instrumental": "erect",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "darnell"
+      ],
+      "playerVocals": [
+        "pico"
+      ]
+    },
+    "stage": "phillyStreetsErect",
+    "noteStyle": "funkin",
+    "album": "expansionP",
+    "stickerPack": "bonus-weekend1",
+    "ratings": {
+      "nightmare": 10,
+      "erect": 8
+    },
+    "previewStart": 0,
+    "previewEnd": 0
+  },
+  "generatedBy": "Friday Night Funkin' - v0.7.4",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 176,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}
