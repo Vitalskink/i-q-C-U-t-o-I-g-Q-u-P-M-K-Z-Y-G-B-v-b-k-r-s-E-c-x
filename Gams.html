@@ -1063,7 +1063,12 @@ function getServerVersion() {
  });
 }
 
-getServerVersion().then(function (serverVersion) {
+/* The GitHub Pages copy is a plain static site. There is no /version.txt to
+   poll and nothing to update there, so the badge just states the pinned
+   version. The local server build keeps the full check. */
+var STATIC_HOST = /(^|\.)github\.io$/i.test(location.hostname);
+
+if (!STATIC_HOST) getServerVersion().then(function (serverVersion) {
  /* The download card should name the version the server is handing out. */
  if (serverVersion && /^[0-9A-Za-z._-]{1,32}$/.test(serverVersion)) {
   var v = l('tooOldVersion');
@@ -2302,6 +2307,12 @@ icon: icon ? document.querySelector('link[rel*="icon"]').href : ''
 }
 
 applyDisguise();
+
+/* Tell the shareable Gams-Online shell the menu is up, so its splash can
+   hand over to this page. Harmless when the menu is opened on its own. */
+try {
+ if (window.top !== window.self) window.top.postMessage({ type: 'gams-ready' }, '*');
+} catch (e) { /* ignore */ }
 
 BroadcastDisguise.onmessage = () => {
 applyDisguise();

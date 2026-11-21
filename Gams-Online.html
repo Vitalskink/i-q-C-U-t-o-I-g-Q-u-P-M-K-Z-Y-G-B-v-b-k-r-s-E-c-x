@@ -283,24 +283,9 @@ body{
     failTimer = setTimeout(showOffline, 28000);
   }
 
-  function probeService(done) {
-    var settled = false;
-    var timer = setTimeout(function () { finish(false); }, 7000);
-    function finish(ok) {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      done(ok);
-    }
-    try {
-      fetch(_svc + '/version.txt?probe=' + Date.now(), { cache: 'no-store', mode: 'cors' })
-        .then(function (resp) { finish(!!resp && resp.ok); })
-        .catch(function () { finish(false); });
-    } catch (e) {
-      finish(false);
-    }
-  }
-
+  /* No health probe any more: the menu lives on GitHub Pages, so loading the
+     iframe is the check. If it cannot load, the load/fail timers take over and
+     show the offline card. */
   function startFrame() {
     setStage(48, savedOnly ? 'Opening your saved games…' : 'Loading the menu…', 92);
     frame.src = _svc + '/Gams.html?client=1&v=' + (nonce++) + (savedOnly ? '&saved=1' : '');
@@ -309,12 +294,7 @@ body{
   function load() {
     savedOnly = false;
     begin();
-    setStage(12, 'Checking the connection…', 40);
-    probeService(function (ok) {
-      if (state !== 'loading') return;
-      if (!ok) { showOffline(); return; }
-      startFrame();
-    });
+    startFrame();
   }
 
   /* The server is away, but the menu itself (and any game saved to this
