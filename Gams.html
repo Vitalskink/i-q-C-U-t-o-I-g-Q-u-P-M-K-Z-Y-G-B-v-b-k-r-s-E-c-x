@@ -985,7 +985,10 @@ var GAM_MODES = ['gam', 'embed', 'blank', 'direct', 'raw'];
  sel.value = stored;
 })();
 
-var UPDATE_SERVER = 'https://complex-gams.ngrok.pizza';
+/* Same origin as whatever serves this page: the local server or GitHub Pages.
+   Both hand out /version.txt, so the badge works either way and no tunnel is
+   involved. */
+var UPDATE_SERVER = '';
 
 var clientVersion = '0';
 try {

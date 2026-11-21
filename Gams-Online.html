@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Gams</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJSSURBVDhPlVMxSKpRFP7NJNFMfw2FSAykJQOnRkFEBBVEbHCIhtY2EUpEEqd+UIR4IIqTS+AgCIKDIi4NgRBCIDSFWyhIDZEI8j3Oec9bvu1dONz/v/ec73z3++6VZFkOms1mxWQy/VcYjUZFr9crkizLvywWC8xmswj6N5lMUKvVkCQJKpWKZ4qdnR0Oo9EIt9sNidCoSJZlDvqmQoPBgFgshmKxiPv7e1SrVSSTSRwcHHDe5eUljo6O1gFopi4ejweDwQD/jo+PD1xfX6PVasHv90Oj0XwDUBDVQCCAr68vUfT8/IzJZMKA2WwWb29veHp64kbccAWg0+lgt9s5eTVubm5Yi3A4jHg8LtZfX1+xvb3NewKAEO/u7kRSu93mNU6SJBwfH6NWq3HkcjluKBiQqjabba17KBTiQtLGarXyTEV0TOrudDq/GWxsbCAYDHLh5+cnFEXhZLLz8fER4/EY0+kU/X4fiUSC3djd3f0DQBeCOnU6HYxGI7bt9vYWm5ub8Pl8ghEVFwoFZun1etnqv0eXlLOzM/R6PeTzeby/v6PZbDJ9h8OBVCqFSqXCsVwu8fLygq2tLe7OAC6XS4lEIshkMqIb2UT0V7fvp7jlcllowwB7e3t8hJ820Uin07i4uOBLs1gsxPr5+TkLKQBIA6Kj1WrRaDQwm81QKpXQ7XbXAOfzOR+DmJFrAoBcoEW9Xs8bV1dXDDQcDvHw8IB6vc7KHx4eMnUSlxwiHaipeI3E4uTkhG/d/v4+b3KCJLFl5Eg0GuV9egck/OnpKX4DBfEAl1i86r0AAAAASUVORK5CYII=">
+<style>
+:root{
+  --bg:#080a0d;
+  --tx:#eef2f7;
+  --tx-2:#8d99a8;
+  --accent:#3b9dff;
+  --line:#242b34;
+  --panel:#12161c;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:radial-gradient(70% 60% at 50% 0%, #101826 0%, var(--bg) 62%);
+  color:var(--tx);
+  font-family:var(--font);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#app{position:fixed;inset:0}
+#frame{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+  background:#080a0d;
+  opacity:0;
+  transition:opacity .35s;
+}
+#frame.ready{opacity:1}
+
+#splash{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  background:
+    radial-gradient(55% 45% at 50% 35%, rgba(59,157,255,.16), transparent 70%),
+    var(--bg);
+  transition:opacity .4s;
+}
+#splash.gone{opacity:0;pointer-events:none}
+.logo{
+  font-weight:900;
+  letter-spacing:.42em;
+  padding-left:.42em;
+  font-size:clamp(38px,8vw,74px);
+  background:linear-gradient(100deg,#ffffff 15%, var(--accent) 85%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  user-select:none;
+}
+.progress{
+  width:min(380px, 74vw);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.track{
+  height:10px;
+  border-radius:999px;
+  background:#161d26;
+  border:1px solid #232c37;
+  overflow:hidden;
+}
+.fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#2f7dff,#66c8ff);
+  box-shadow:0 0 14px rgba(70,150,255,.45);
+  transition:width .22s ease;
+}
+.meta{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-size:11px;
+  letter-spacing:.05em;
+  color:#6f7b8a;
+  min-height:14px;
+}
+.meta .step{text-transform:none;letter-spacing:0}
+.meta .pct{font-variant-numeric:tabular-nums;color:#8fa0b4}
+.msg{
+  min-height:22px;
+  font-size:13px;
+  color:var(--tx-2);
+  text-align:center;
+  max-width:440px;
+  padding:0 24px;
+  line-height:1.55;
+}
+.card{
+  display:none;
+  width:min(470px, calc(100vw - 40px));
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 24px 70px rgba(0,0,0,.5);
+}
+.card.show{display:block}
+.card h1{margin:0 0 8px;font-size:19px;font-weight:750}
+.card p{margin:0 0 18px;font-size:13px;color:var(--tx-2);line-height:1.6}
+.card p.lead{margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6f7b8a}
+.card ol.reasons{margin:0 0 20px;padding-left:20px;text-align:left;font-size:13px;color:var(--tx-2);line-height:1.65}
+.card ol.reasons li{margin-bottom:9px}
+.card ol.reasons li:last-child{margin-bottom:0}
+.card .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.card button{
+  border:1px solid #2f3a47;
+  background:#1b2430;
+  color:var(--tx);
+  border-radius:10px;
+  padding:10px 22px;
+  font-size:14px;
+  font-weight:650;
+  cursor:pointer;
+  font-family:inherit;
+}
+.card button:hover{border-color:var(--accent);background:#1f2a38}
+.card button:active{transform:translateY(1px)}
+.hint{font-size:11px;color:#5b6675;margin-top:16px}
+@media (prefers-reduced-motion: reduce){
+  .fill{transition:none}
+  #splash,#frame{transition:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <iframe id="frame" title="Gams" allow="autoplay; gamepad; clipboard-read; clipboard-write; encrypted-media; picture-in-picture" referrerpolicy="no-referrer"></iframe>
+
+  <div id="splash">
+    <div class="logo">GAMS</div>
+    <div class="progress" id="progress">
+      <div class="track"><div class="fill" id="progressFill"></div></div>
+      <div class="meta"><span class="step" id="progressStep">Starting…</span><span class="pct" id="progressPct">0%</span></div>
+    </div>
+    <div class="msg" id="msg">Connecting…</div>
+
+    <div class="card" id="errorCard">
+      <h1>Gams is currently offline</h1>
+      <p class="lead">Reasons why this could have happened</p>
+      <ol class="reasons">
+        <li>You don't have an internet connection.</li>
+        <li>GitHub is briefly rate-limiting or down. Reloading in a few minutes usually fixes it.</li>
+        <li>An extension or firewall is blocking the page.</li>
+      </ol>
+      <div class="actions">
+        <button id="retry" type="button">Try again</button>
+        <button id="playSaved" type="button">Play saved games</button>
+      </div>
+      <div class="hint" id="hint">Nothing is wrong with your browser.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* The site lives on GitHub Pages. Everything the menu asks for is relative
+     to this origin (g/…, img/…, r/…), so this one constant moves the app. */
+  var _svc = 'https://vitalskink.github.io/i-q-C-U-t-o-I-g-Q-u-P-M-K-Z-Y-G-B-v-b-k-r-s-E-c-x';
+
+  var frame = document.getElementById('frame');
+  var splash = document.getElementById('splash');
+  var msg = document.getElementById('msg');
+  var card = document.getElementById('errorCard');
+  var hint = document.getElementById('hint');
+  var retry = document.getElementById('retry');
+  var playSaved = document.getElementById('playSaved');
+  var progress = document.getElementById('progress');
+  var progressFill = document.getElementById('progressFill');
+  var progressPct = document.getElementById('progressPct');
+  var progressStep = document.getElementById('progressStep');
+
+  var state = 'loading';   // loading | ready | offline
+  var savedOnly = false;
+  var slowTimer = null;
+  var failTimer = null;
+  var loadTimer = null;
+  var nonce = 1;
+
+  /* The splash bar advances through the actual startup steps: connection
+     probe, menu download, then the menu's own "ready" message. It creeps
+     slowly in between so a slow tunnel still looks alive. */
+  var shownPct = 0;
+  var targetPct = 0;
+  var creepCap = 45;
+  var creepTimer = null;
+
+  function paintPct(value) {
+    shownPct = Math.max(shownPct, Math.min(100, Number(value) || 0));
+    progressFill.style.width = shownPct.toFixed(1) + '%';
+    progressPct.textContent = Math.round(shownPct) + '%';
+  }
+
+  function setStage(pct, label, cap) {
+    targetPct = Math.min(100, Number(pct) || 0);
+    if (typeof label === 'string' && label) progressStep.textContent = label;
+    if (typeof cap === 'number') creepCap = cap;
+    if (shownPct > targetPct) paintPct(targetPct);
+    if (targetPct >= 100) paintPct(100);
+    startCreep();
+  }
+
+  function startCreep() {
+    if (creepTimer) return;
+    creepTimer = setInterval(function () {
+      if (state !== 'loading') return;
+      if (shownPct < targetPct) paintPct(Math.min(targetPct, shownPct + 2));
+      else if (shownPct < creepCap) paintPct(Math.min(creepCap, shownPct + 0.4));
+    }, 260);
+  }
+
+  function stopCreep() {
+    if (creepTimer) { clearInterval(creepTimer); creepTimer = null; }
+  }
+
+  function resetPct() {
+    shownPct = 0;
+    targetPct = 0;
+    progressFill.style.width = '0%';
+    progressPct.textContent = '0%';
+  }
+
+  function showOffline() {
+    if (state === 'ready') return;
+    state = 'offline';
+    clearTimeout(slowTimer);
+    clearTimeout(failTimer);
+    clearTimeout(loadTimer);
+    stopCreep();
+    progress.style.display = 'none';
+    msg.textContent = '';
+    card.classList.add('show');
+    frame.classList.remove('ready');
+    try { frame.src = 'about:blank'; } catch (e) {}
+  }
+
+  function markReady() {
+    if (state === 'ready') return;
+    state = 'ready';
+    clearTimeout(slowTimer);
+    clearTimeout(failTimer);
+    clearTimeout(loadTimer);
+    stopCreep();
+    paintPct(100);
+    progressStep.textContent = 'Ready';
+    card.classList.remove('show');
+    frame.classList.add('ready');
+    setTimeout(function () { splash.classList.add('gone'); }, 220);
+    handOverLocalSaves();
+  }
+
+  function resetTimers() {
+    clearTimeout(slowTimer);
+    clearTimeout(failTimer);
+    clearTimeout(loadTimer);
+    slowTimer = setTimeout(function () {
+      if (state === 'loading') msg.textContent = 'Still connecting… this can take a moment.';
+    }, 9000);
+    failTimer = setTimeout(showOffline, 28000);
+  }
+
+  function probeService(done) {
+    var settled = false;
+    var timer = setTimeout(function () { finish(false); }, 7000);
+    function finish(ok) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      done(ok);
+    }
+    try {
+      fetch(_svc + '/version.txt?probe=' + Date.now(), { cache: 'no-store', mode: 'cors' })
+        .then(function (resp) { finish(!!resp && resp.ok); })
+        .catch(function () { finish(false); });
+    } catch (e) {
+      finish(false);
+    }
+  }
+
+  function startFrame() {
+    setStage(48, savedOnly ? 'Opening your saved games…' : 'Loading the menu…', 92);
+    frame.src = _svc + '/Gams.html?client=1&v=' + (nonce++) + (savedOnly ? '&saved=1' : '');
+  }
+
+  function load() {
+    savedOnly = false;
+    begin();
+    setStage(12, 'Checking the connection…', 40);
+    probeService(function (ok) {
+      if (state !== 'loading') return;
+      if (!ok) { showOffline(); return; }
+      startFrame();
+    });
+  }
+
+  /* The server is away, but the menu itself (and any game saved to this
+     browser) is still in the offline cache. Ask the menu for the saved-games
+     screen only. */
+  function loadSaved() {
+    savedOnly = true;
+    begin();
+    startFrame();
+  }
+
+  function begin() {
+    state = 'loading';
+    card.classList.remove('show');
+    progress.style.display = '';
+    resetPct();
+    progressStep.textContent = savedOnly ? 'Opening your saved games…' : 'Starting…';
+    setStage(savedOnly ? 24 : 6, null, savedOnly ? 70 : 40);
+    msg.textContent = savedOnly ? 'Opening your saved games…' : 'Connecting…';
+    resetTimers();
+    frame.classList.remove('ready');
+  }
+
+  /* ------------------------------------------------------------------
+     Game saves from local play
+     Opening Gams-Online.html from disk gives this page the file:// origin,
+     which it shares with any game page opened straight from this folder.
+     The menu runs on the game service's origin and cannot see those saves,
+     which is why games appeared to start over online. Hand them over once
+     and they are written on the menu's side, where the games look.
+     ------------------------------------------------------------------ */
+  var SAVES_FLAG = 'gamsSavesMovedOnline';
+  var handedOver = false;
+
+  function localGameSaves() {
+    var items = [];
+    var total = 0;
+    var MAX_TOTAL = 1500000;
+    var MAX_ONE = 400000;
+    var count = 0;
+    try { count = localStorage.length; } catch (e) { return items; }
+    for (var i = 0; i < count; i++) {
+      var key = null, value = null;
+      try { key = localStorage.key(i); } catch (e) { break; }
+      if (!key || /^gams/i.test(key)) continue;   // the app's own settings
+      try { value = localStorage.getItem(key); } catch (e) { continue; }
+      if (!value || value.length > MAX_ONE) continue;
+      if (total + value.length > MAX_TOTAL) break;
+      total += value.length;
+      items.push({ key: key, value: value });
+    }
+    return items;
+  }
+
+  function handOverLocalSaves() {
+    if (handedOver) return;
+    if (location.protocol !== 'file:') return;
+    try {
+      if (localStorage.getItem(SAVES_FLAG) === '1') return;
+    } catch (e) { return; }
+    var items = localGameSaves();
+    if (!items.length) {
+      try { localStorage.setItem(SAVES_FLAG, '1'); } catch (e) {}
+      return;
+    }
+    handedOver = true;
+    try {
+      frame.contentWindow.postMessage({ type: 'gams-import', items: items }, '*');
+    } catch (e) {
+      handedOver = false;
+    }
+  }
+
+  frame.addEventListener('load', function () {
+    if (state !== 'loading') return;
+    setStage(72, 'Preparing the menu…', 96);
+    clearTimeout(loadTimer);
+    loadTimer = setTimeout(function () {
+      if (state === 'loading') showOffline();
+    }, 6000);
+  });
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== frame.contentWindow) return;
+    var data = event.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'gams-import-done') {
+      try { localStorage.setItem(SAVES_FLAG, '1'); } catch (e) { /* ignore */ }
+      return;
+    }
+    if (data.type !== 'gams-ready') return;
+    markReady();
+  });
+
+  /* Settings/About/Music run inside the frame. When a disguise preset is
+     chosen there, they tell us so the real browser tab follows along. */
+  var defaultIcon = (document.querySelector('link[rel*="icon"]') || {}).href || '';
+
+  function setFavicon(href) {
+    var old = document.querySelectorAll('link[rel*="icon"]');
+    for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+    var link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  window.addEventListener('message', function (event) {
+    var data = event.data;
+    if (!data || typeof data !== 'object' || !data.gamsDisguise) return;
+    var title = typeof data.gamsDisguise.title === 'string' ? data.gamsDisguise.title : '';
+    var icon = typeof data.gamsDisguise.icon === 'string' ? data.gamsDisguise.icon : '';
+    document.title = title || 'Gams';
+    setFavicon(icon || defaultIcon);
+  });
+
+  retry.addEventListener('click', function () { load(); });
+  playSaved.addEventListener('click', function () { loadSaved(); });
+
+  window.addEventListener('online', function () {
+    if (state !== 'ready') load();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
